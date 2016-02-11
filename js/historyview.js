@@ -241,7 +241,7 @@ define(['d3'], function () {
                 .transition()
                 .duration(1000)
                 .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return  - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
+                .attr('y', function(t) { return -13 - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
             
             var newTags = tags.enter()
                 .append("svg:g")
@@ -255,14 +255,14 @@ define(['d3'], function () {
                 .attr("width", 46)
                 .attr("height", 20)
                 .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return -13 - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
+                .attr('y', function(t) { return -13 - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
             
             newTags
                 .append("svg:text")
                 .attr("width", 46)
                 .attr("height", 20)
                 .attr('x', function(t) { return view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
+                .attr('y', function(t) { return - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
                 .text(function(t) { return t.id} )
         },
 
