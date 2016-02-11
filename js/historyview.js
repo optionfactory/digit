@@ -8,9 +8,6 @@ define(['d3'], function () {
      * @class HistoryView
      * @constructor
      */
-
-
-
     function HistoryView(config) {
         this.commitData = config.commitData;
         this.tags = config.tags || [];
@@ -24,6 +21,8 @@ define(['d3'], function () {
 
         this.commitRadius = config.commitRadius || 20;
         this.pointerMargin = this.commitRadius * 1.3;
+        this.spacingX = config.spacingX || 100;
+        this.spacingY = config.spacingY || -150;
     }
 
     HistoryView.generateId = function () {
@@ -35,19 +34,19 @@ define(['d3'], function () {
             var view = this;
             selection
                 .attr('cx', function (d) {
-                    return d.x * view.commitRadius * 4.5;
+                    return d.x * view.spacingX;
                 })
                 .attr('cy', function (d) {
-                    return - (d.y * view.commitRadius * 4);
+                    return d.y * view.spacingY;
                 });
         },
 
         fixIdPosition: function (selection, delta) {
             var view = this;
             selection.attr('x', function (d) {
-                return d.x * view.commitRadius * 4.5;
+                return d.x * view.spacingX;
             }).attr('y', function (d) {
-                return - (d.y * view.commitRadius * 4 - view.commitRadius - delta);
+                return d.y * view.spacingY - view.commitRadius - delta;
             });
         },
  
@@ -70,17 +69,6 @@ define(['d3'], function () {
             svg.attr('id', this.name)
                 .attr('width', this.width)
                 .attr('height', this.height);
-            
-            svg.append('svg:text')
-                .classed('remote-name-display', true)
-                .text('Local Repository')
-                .attr('x', 10)
-                .attr('y', 25);
-
-            svg.append('svg:text')
-                .classed('current-branch-display', true)
-                .attr('x', 10)
-                .attr('y', 45);
 
             this.svgContainer = svgContainer;
             this.svg = svg;
@@ -116,23 +104,6 @@ define(['d3'], function () {
             });
             console.log(this.commitData);
         },
-        
-        _resizeSvg: function() {
-            var ele = document.getElementById(this.svg.node().id);
-            var container = ele.parentNode;
-            var currentWidth = ele.offsetWidth;
-            var newWidth;
-
-            if (ele.getBBox().width > container.offsetWidth)
-                newWidth = Math.round(ele.getBBox().width);
-            else
-                newWidth = container.offsetWidth - 5;
-
-            if (currentWidth != newWidth) {
-                this.svg.attr('width', newWidth);
-                container.scrollLeft = container.scrollWidth;
-            }
-        },
 
         renderCommits: function () {
             if (typeof this.height === 'string' && this.height.indexOf('%') >= 0) {
@@ -148,17 +119,12 @@ define(['d3'], function () {
             this._calculatePositionData();
             this._renderCircles();
             this._renderIdLabels();
-            this._resizeSvg();
         },
-
 
         trim: function(pair) {
             var view = this,
                 delta1 = view.commitRadius,
                 delta2 = view.pointerMargin;
-
-            delta1 = delta1 || 20;
-            delta2 = delta2 || 35;
 
             var p1 = pair[0],
                 p2 = pair[1];
@@ -178,11 +144,11 @@ define(['d3'], function () {
         scale: function (pair) {
             var view = this;
             return [{
-                    x: pair[0].x * view.commitRadius * 4.5, 
-                    y: - (pair[0].y * view.commitRadius * 4)
+                    x: pair[0].x * view.spacingX, 
+                    y: pair[0].y * view.spacingY
                 }, {
-                    x: pair[1].x * view.commitRadius * 4.5, 
-                    y: - (pair[1].y * view.commitRadius * 4)
+                    x: pair[1].x * view.spacingX, 
+                    y: pair[1].y * view.spacingY
                 }]; 
         },
 
@@ -215,7 +181,7 @@ define(['d3'], function () {
 
             var existingPointers = 
                 existingCommits.selectAll('line.commit-pointer')
-                .data(function(c) { return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, function (pair) { console.log(pair); return pair[0].id+"-"+pair[1].id; })
+                .data(function(c) { return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, function (pair) { return pair[0].id+"-"+pair[1].id; })
                 
             var newPointers = 
                 existingPointers.enter()
@@ -240,12 +206,13 @@ define(['d3'], function () {
             tags.select("rect")
                 .transition()
                 .duration(1000)
-                .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return -13 - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
+                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
+                .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
             
             var newTags = tags.enter()
                 .append("svg:g")
                 .classed("branch-tag", true)
+                .attr('transform', "translate(0, " + 2*view.commitRadius +")")
                 .attr('id', function (t) {
                     return view.name + '-' + t.id;
                 })
@@ -254,15 +221,15 @@ define(['d3'], function () {
                 .append("svg:rect")
                 .attr("width", 46)
                 .attr("height", 20)
-                .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return -13 - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
+                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
+                .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
             
             newTags
                 .append("svg:text")
                 .attr("width", 46)
                 .attr("height", 20)
-                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
+                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
+                .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
                 .text(function(t) { return t.id} )
         },
 

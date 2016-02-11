@@ -226,6 +226,7 @@ g.branch-tag > rect {
 	fill: #FFCC66;
 	stroke: #CC9900;
 	stroke-width: 2;
+    transform: translate(-50%, -65%);
 }
 
 g.branch-tag.git-tag > rect {
