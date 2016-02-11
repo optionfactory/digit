@@ -75,7 +75,7 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
     tags: [{ id: "master", commitId: "d"}],
     name: "test",
     branches: null,
-    head: null
+    head: { commitId: "c"}
   });
   historyView.render(d3.select(".container"));
   setTimeout(function() {

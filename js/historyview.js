@@ -21,8 +21,8 @@ define(['d3'], function () {
 
         this.commitRadius = config.commitRadius || 20;
         this.pointerMargin = this.commitRadius * 1.3;
-        this.spacingX = config.spacingX || 100;
-        this.spacingY = config.spacingY || -150;
+        this.spacingX = config.spacingX || 100 * 1.5;
+        this.spacingY = config.spacingY || -100 * 1.5;
     }
 
     HistoryView.generateId = function () {
@@ -203,7 +203,7 @@ define(['d3'], function () {
             var tags = this.tagBox.selectAll('g.branch-tag')
                 .data(this.tags, function (t) { return t.id; })  
 
-            tags.select("rect")
+            tags
                 .transition()
                 .duration(1000)
                 .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
@@ -237,6 +237,82 @@ define(['d3'], function () {
                 .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
                 .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
                 .text(function(t) { return t.id} )
+
+            var head = this.tagBox.selectAll('g.head-tag')
+                .data([view.head])
+                .attr('transform', function(h) {
+                    return "translate(" + (h.branchId ? 3 : 0)*view.commitRadius + ", " + 2*view.commitRadius +")"
+                })
+                
+            
+            head
+                .select("text")
+                .attr('x', function(h) { 
+                    if (h.branchId) {
+                        var t = view.tags.find(function(t) { return t.id === h.branchId});
+                        return view.getCommit(t.commitId).x * view.spacingX;
+                    } else {
+                        return view.getCommit(h.commitId).x * view.spacingX;
+                    }
+                })
+                .attr('y', function(h) { 
+                    if (h.branchId) {
+                        var t = view.tags.find(function(t) { return t.id === h.branchId});
+                        return view.getCommit(t.commitId).y * view.spacingY;
+                    } else {
+                        return view.getCommit(h.commitId).y * view.spacingY;
+                    }
+                })
+
+            head.enter()
+                .append("svg:g")
+                .classed("head-tag", true)
+                .attr('transform', function(h) {
+                    return "translate(" + (h.branchId ? 3 : 0)*view.commitRadius + ", " + 2*view.commitRadius +")"
+                })
+                .attr('id', function (t) {
+                    return view.name + '-' + "HEAD";
+                })
+            head
+                .append("svg:rect")
+                .attr("width", 2.5*view.commitRadius)
+                .attr("height", view.commitRadius)
+                .attr('x', function(h) { 
+                    if (h.branchId) {
+                        var t = view.tags.find(function(t) { return t.id === h.branchId});
+                        return view.getCommit(t.commitId).x * view.spacingX;
+                    } else {
+                        return view.getCommit(h.commitId).x * view.spacingX;
+                    }
+                })
+                .attr('y', function(h) { 
+                    if (h.branchId) {
+                        var t = view.tags.find(function(t) { return t.id === h.branchId});
+                        return view.getCommit(t.commitId).y * view.spacingY;
+                    } else {
+                        return view.getCommit(h.commitId).y * view.spacingY;
+                    }
+                })
+            head
+                .append("svg:text")
+                .text("< HEAD")
+                .attr('x', function(h) { 
+                    if (h.branchId) {
+                        var t = view.tags.find(function(t) { return t.id === h.branchId});
+                        return view.getCommit(t.commitId).x * view.spacingX;
+                    } else {
+                        return view.getCommit(h.commitId).x * view.spacingX;
+                    }
+                })
+                .attr('y', function(h) { 
+                    if (h.branchId) {
+                        var t = view.tags.find(function(t) { return t.id === h.branchId});
+                        return view.getCommit(t.commitId).y * view.spacingY;
+                    } else {
+                        return view.getCommit(h.commitId).y * view.spacingY;
+                    }
+                })
+
         },
 
         _renderIdLabels: function () {

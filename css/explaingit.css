@@ -250,6 +250,7 @@ g.head-tag > rect {
 	fill: #CCFFCC;
 	stroke: #339900;
 	stroke-width: 2;
+    transform: translate(-50%, -65%);
 }
 
 g.head-tag > text {
