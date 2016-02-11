@@ -77,4 +77,12 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
     head: null
   });
   historyView.render(d3.select(".container"));
+  setTimeout(function() {
+    historyView.commitData.push({
+        id: "f",
+        parents: ["e"]
+    })
+    historyView.renderCommits();
+  }, 3000);
+
 });

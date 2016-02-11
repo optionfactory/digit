@@ -9,21 +9,7 @@ define(['d3'], function () {
      * @constructor
      */
 
-    function trim(pair, delta1, delta2) {
-        var p1 = pair[0],
-            p2 = pair[1];
-        var w = p1.x - p2.x,
-            h = p1.y - p2.y,
-            l = Math.sqrt(w*w + h*h);
-        
-        return [{
-            x: p1.x - delta1 * w/l,
-            y: p1.y - delta1 * h/l,
-        }, {
-            x: p2.x + delta2 * w/l,
-            y: p2.y + delta2 * h/l,
-        }]
-    } 
+
 
     function HistoryView(config) {
         this.commitData = config.commitData;
@@ -162,6 +148,41 @@ define(['d3'], function () {
             this._resizeSvg();
         },
 
+
+        trim: function(pair) {
+            var view = this,
+                delta1 = view.commitRadius,
+                delta2 = view.pointerMargin;
+
+            delta1 = delta1 || 20;
+            delta2 = delta2 || 35;
+
+            var p1 = pair[0],
+                p2 = pair[1];
+            var w = p1.x - p2.x,
+                h = p1.y - p2.y,
+                l = Math.sqrt(w*w + h*h);
+            
+            return [{
+                x: p1.x - delta1 * w/l,
+                y: p1.y - delta1 * h/l,
+            }, {
+                x: p2.x + delta2 * w/l,
+                y: p2.y + delta2 * h/l,
+            }]
+        },
+
+        scale: function (pair) {
+            var view = this;
+            return [{
+                    x: pair[0].x * view.commitRadius * 4.5, 
+                    y: view.baseLine - (pair[0].y * view.commitRadius * 4)
+                }, {
+                    x: pair[1].x * view.commitRadius * 4.5, 
+                    y: view.baseLine - (pair[1].y * view.commitRadius * 4)
+                }]; 
+        },
+
         _renderCircles: function () {
             var view = this;
 
@@ -173,9 +194,7 @@ define(['d3'], function () {
                 .attr('id', function (d) {
                     return view.name + '-' + d.id;
                 })
-                .transition()
-                .duration(500)
-                .call(this.fixCirclePosition.bind(this))
+               
 
             existingCommits.enter()
                 .append("g")
@@ -193,22 +212,8 @@ define(['d3'], function () {
 
             var existingPointers = 
                 existingCommits.selectAll('line.commit-pointer')
-                .data(function(c) { return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, function (pair) { return pair[0].id+"-"+pair[1].id; })
-                .attr('id', function (pair) {
-                    return view.name + '-' + pair[0].id + '-to-' + pair[1].id;
-                });
-
-            existingPointers
-                .transition()
-                .duration(500)
-                .attr('x1', function (pair) { return pair[0].x * view.commitRadius * 4.5})
-                .attr('y1', function (pair) {  return view.baseLine - (pair[0].y * view.commitRadius * 4)})
-                .attr('marker-end', REG_MARKER_END)
-                .transition()
-                .duration(500)
-                .attr('x2', function (pair) { return pair[1].x * view.commitRadius * 4.5})
-                .attr('y2', function (pair) {  return view.baseLine - (pair[1].y * view.commitRadius * 4)})
-
+                .data(function(c) { return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, function (pair) { console.log(pair); return pair[0].id+"-"+pair[1].id; })
+                
             var newPointers = 
                 existingPointers.enter()
                 .append('svg:line')
@@ -216,59 +221,19 @@ define(['d3'], function () {
                     return view.name + '-' + pair[0].id + '-to-' + pair[1].id;
                 })
                 .classed('commit-pointer', true)
-                .datum(function(pair) { return trim([{
-                        x: pair[0].x * view.commitRadius * 4.5, 
-                        y: view.baseLine - (pair[0].y * view.commitRadius * 4)
-                    }, {
-                        x: pair[1].x * view.commitRadius * 4.5, 
-                        y: view.baseLine - (pair[1].y * view.commitRadius * 4)
-                    }], 20, 30); 
-                })
-                .attr('x1', function (pair) { return pair[0].x})
-                .attr('y1', function (pair) {  return pair[0].y})
+                .attr('x1', function (pair) { return view.trim(view.scale(pair))[0].x})
+                .attr('y1', function (pair) {  return view.trim(view.scale(pair))[0].y})
+                .attr('x2', function (pair) { return view.trim(view.scale(pair))[0].x})
+                .attr('y2', function (pair) {  return view.trim(view.scale(pair))[0].y})
                 .attr('marker-end', REG_MARKER_END)
                 .transition()
                 .duration(500)
-                .attr('x2', function (pair) { return pair[1].x})
-                .attr('y2', function (pair) {  return pair[1].y})
-            
-                
-
+                .attr('x2', function (pair) { return view.trim(view.scale(pair))[1].x})
+                .attr('y2', function (pair) {  return view.trim(view.scale(pair))[1].y})
         },
-        _renderArrows: function () {
-            var view = this,
-                existingPointers,
-                newPointers;
-
-            existingPointers = this.arrowBox.selectAll('line.commit-pointer')
-                .data(this.commitData, function (d) { return d.id; })
-                .attr('id', function (d) {
-                    return view.name + '-' + d.id + '-to-' + d.parent;
-                });
-
-            existingPointers.transition()
-                .duration(500)
-                .call(fixPointerStartPosition, view)
-                .call(fixPointerEndPosition, view);
-
-            newPointers = existingPointers.enter()
-                .append('svg:line')
-                .attr('id', function (d) {
-                    return view.name + '-' + d.id + '-to-' + d.parent;
-                })
-                .classed('commit-pointer', true)
-                .call(fixPointerStartPosition, view)
-                .attr('x2', function () { return d3.select(this).attr('x1'); })
-                .attr('y2', function () {  return d3.select(this).attr('y1'); })
-                .attr('marker-end', REG_MARKER_END)
-                .transition()
-                .duration(500)
-                .call(fixPointerEndPosition, view);
-        },
-
 
         _renderIdLabels: function () {
-            this._renderText('id-label', function (d) { return d.id + '..'; }, 14);
+            this._renderText('id-label', function (d) { return d.id; }, 14);
             this._renderText('message-label', function (d) { return d.message; }, 24);
         },
 
