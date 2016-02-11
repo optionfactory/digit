@@ -13,6 +13,7 @@ define(['d3'], function () {
 
     function HistoryView(config) {
         this.commitData = config.commitData;
+        this.tags = config.tags || [];
         this.name = config.name || 'UnnamedHistoryView';
         this.branches = config.branches;
         this.head = config.head;
@@ -230,6 +231,37 @@ define(['d3'], function () {
                 .duration(500)
                 .attr('x2', function (pair) { return view.trim(view.scale(pair))[1].x})
                 .attr('y2', function (pair) {  return view.trim(view.scale(pair))[1].y})
+
+            var tags = this.tagBox.selectAll('g.branch-tag')
+                .data(this.tags, function (t) { return t.id; })  
+
+            tags.select("rect")
+                .transition()
+                .duration(1000)
+                .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
+                .attr('y', function(t) { return view.baseLine - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
+            
+            var newTags = tags.enter()
+                .append("svg:g")
+                .classed("branch-tag", true)
+                .attr('id', function (t) {
+                    return view.name + '-' + t.id;
+                })
+
+            newTags
+                .append("svg:rect")
+                .attr("width", 46)
+                .attr("height", 20)
+                .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
+                .attr('y', function(t) { return -13 + view.baseLine - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
+            
+            newTags
+                .append("svg:text")
+                .attr("width", 46)
+                .attr("height", 20)
+                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
+                .attr('y', function(t) { return view.baseLine - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
+                .text(function(t) { return t.id} )
         },
 
         _renderIdLabels: function () {

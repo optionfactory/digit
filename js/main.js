@@ -72,6 +72,7 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
         id: "e",
         parents: ["b"]
     }],
+    tags: [{ id: "master", commitId: "d"}],
     name: "test",
     branches: null,
     head: null
