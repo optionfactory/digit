@@ -216,18 +216,24 @@ define(['d3'], function () {
                 .attr('id', function (t) {
                     return view.name + '-' + t.id;
                 })
+                .style("opacity", 0)
+            
+            newTags.transition()
+                .delay(1000)
+                .duration(500)
+                .style("opacity", 1)
 
             newTags
                 .append("svg:rect")
-                .attr("width", 46)
-                .attr("height", 20)
+                .attr("width", 2.5*view.commitRadius)
+                .attr("height", view.commitRadius)
                 .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
                 .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
             
             newTags
                 .append("svg:text")
-                .attr("width", 46)
-                .attr("height", 20)
+                .attr("width", 2.5*view.commitRadius)
+                .attr("height", view.commitRadius)
                 .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
                 .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
                 .text(function(t) { return t.id} )
