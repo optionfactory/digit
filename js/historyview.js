@@ -38,7 +38,7 @@ define(['d3'], function () {
                     return d.x * view.commitRadius * 4.5;
                 })
                 .attr('cy', function (d) {
-                    return view.baseLine - (d.y * view.commitRadius * 4);
+                    return - (d.y * view.commitRadius * 4);
                 });
         },
 
@@ -47,7 +47,7 @@ define(['d3'], function () {
             selection.attr('x', function (d) {
                 return d.x * view.commitRadius * 4.5;
             }).attr('y', function (d) {
-                return view.baseLine - (d.y * view.commitRadius * 4 - view.commitRadius - delta);
+                return - (d.y * view.commitRadius * 4 - view.commitRadius - delta);
             });
         },
  
@@ -84,9 +84,10 @@ define(['d3'], function () {
 
             this.svgContainer = svgContainer;
             this.svg = svg;
-            this.arrowBox = svg.append('svg:g').classed('pointers', true);
-            this.commitBox = svg.append('svg:g').classed('commits', true);
-            this.tagBox = svg.append('svg:g').classed('tags', true);
+            this.translator = svg.append('svg:g');
+            this.arrowBox = this.translator.append('svg:g').classed('pointers', true);
+            this.commitBox = this.translator.append('svg:g').classed('commits', true);
+            this.tagBox = this.translator.append('svg:g').classed('tags', true);
             // TODO: branches? head?
             this.renderCommits();
             // this._setCurrentBranch(this.head);
@@ -143,6 +144,7 @@ define(['d3'], function () {
                     this.svg.attr('height', baseLineCalcHeight);
                 }
             }
+            this.translator.attr('transform', 'translate(0, '+ this.baseLine + ') scale(1)');
             this._calculatePositionData();
             this._renderCircles();
             this._renderIdLabels();
@@ -177,10 +179,10 @@ define(['d3'], function () {
             var view = this;
             return [{
                     x: pair[0].x * view.commitRadius * 4.5, 
-                    y: view.baseLine - (pair[0].y * view.commitRadius * 4)
+                    y: - (pair[0].y * view.commitRadius * 4)
                 }, {
                     x: pair[1].x * view.commitRadius * 4.5, 
-                    y: view.baseLine - (pair[1].y * view.commitRadius * 4)
+                    y: - (pair[1].y * view.commitRadius * 4)
                 }]; 
         },
 
@@ -239,7 +241,7 @@ define(['d3'], function () {
                 .transition()
                 .duration(1000)
                 .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return view.baseLine - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
+                .attr('y', function(t) { return  - (view.getCommit(t.commitId).y * view.commitRadius * 4 - 2*view.commitRadius - 36);})
             
             var newTags = tags.enter()
                 .append("svg:g")
@@ -253,14 +255,14 @@ define(['d3'], function () {
                 .attr("width", 46)
                 .attr("height", 20)
                 .attr('x', function(t) { return -46/2 + view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return -13 + view.baseLine - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
+                .attr('y', function(t) { return -13 - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
             
             newTags
                 .append("svg:text")
                 .attr("width", 46)
                 .attr("height", 20)
                 .attr('x', function(t) { return view.getCommit(t.commitId).x * view.commitRadius * 4.5;})
-                .attr('y', function(t) { return view.baseLine - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
+                .attr('y', function(t) { return - (view.getCommit(t.commitId).y * view.commitRadius * 4 - view.commitRadius - 36);})
                 .text(function(t) { return t.id} )
         },
 
