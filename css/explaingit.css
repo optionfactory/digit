@@ -222,38 +222,38 @@ text.message-label {
     font-size: 10px;
 }
 
-g.branch-tag > rect {
+g.branch > rect {
 	fill: #FFCC66;
 	stroke: #CC9900;
 	stroke-width: 2;
     transform: translate(-50%, -65%);
 }
 
-g.branch-tag.git-tag > rect {
+g.branch.git-tag > rect {
 	fill: #7FC9FF;
 	stroke: #0026FF;
 }
 
-g.branch-tag.remote-branch > rect {
+g.branch.remote-branch > rect {
 	fill: #CCC;
 	stroke: #888;
 }
 
-g.branch-tag > text {
+g.branch > text {
 	text-anchor: middle;
 	fill: #000;
 	font-size: 11px;
 	font-family: Arial;
 }
 
-g.head-tag > rect {
+g.head > rect {
 	fill: #CCFFCC;
 	stroke: #339900;
 	stroke-width: 2;
     transform: translate(-50%, -65%);
 }
 
-g.head-tag > text {
+g.head > text {
 	text-anchor: middle;
 	fill: #000;
 	font-size: 11px;
