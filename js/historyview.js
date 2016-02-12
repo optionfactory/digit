@@ -177,26 +177,33 @@ define(['d3'], function () {
                 .duration(500)
                 .attr('r', this.commitRadius)
 
+            var pointSetter = function(dstIdx, srcIdx) {
+                return function(sel, pair) {
+                    return sel
+                        .attr('x'+dstIdx, function (pair) { return view.trim(view.scale(pair))[srcIdx].x})
+                        .attr('y'+dstIdx, function (pair) {  return view.trim(view.scale(pair))[srcIdx].y})
+                }
+            }
+
             var existingPointers = 
                 existingCommits.selectAll('line.commit-pointer')
                 .data(function(c) { 
                     return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, 
                     idOf)
+                .call(pointSetter(1,0))
+                .call(pointSetter(2,1))
                 
             var newPointers = 
                 existingPointers.enter()
                 .append('svg:line')
                 .attr('id', idOf)
                 .classed('commit-pointer', true)
-                .attr('x1', function (pair) { return view.trim(view.scale(pair))[0].x})
-                .attr('y1', function (pair) {  return view.trim(view.scale(pair))[0].y})
-                .attr('x2', function (pair) { return view.trim(view.scale(pair))[0].x})
-                .attr('y2', function (pair) {  return view.trim(view.scale(pair))[0].y})
+                .call(pointSetter(1,0))
+                .call(pointSetter(2,0))
                 .attr('marker-end', REG_MARKER_END)
                 .transition()
                 .duration(500)
-                .attr('x2', function (pair) { return view.trim(view.scale(pair))[1].x})
-                .attr('y2', function (pair) {  return view.trim(view.scale(pair))[1].y})
+                .call(pointSetter(2,1))
 
 
             var branchIndexByCommit = function(branch) {
