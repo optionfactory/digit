@@ -95,12 +95,10 @@ define(['d3'], function () {
                     var parentSlots = commit.parents.map(function(parentId) { return view.getCommit(parentId).y}).sort().reverse();
                     var opts = parentSlots.filter(slots.includes.bind(slots)).concat(slots);
                     var slot = opts[0];
-                    console.log(slot);
                     commit.y = slot;
                     slots.splice(slots.indexOf(slot), 1);
                 }
             });
-            console.log(this.commitData);
         },
 
         renderCommits: function () {
@@ -153,23 +151,25 @@ define(['d3'], function () {
         _renderCircles: function () {
             var view = this;
 
+            var idOf = function(e) {
+                if (Array.isArray(e)) {
+                    return view.name + "-" + e.map(function(el) {return el.id}).join("-");
+                }
+                return view.name + "-" + e.id;
+            }
+
             var existingCommits = this.commitBox.selectAll('g.commit')
-                .data(this.commitData, function (d) { return d.id; })
+                .data(this.commitData, idOf)
             
             existingCommits
                 .select("circle.commit")
-                .attr('id', function (d) {
-                    return view.name + '-' + d.id;
-                })
-               
+                .attr('id', idOf)
 
             existingCommits.enter()
                 .append("g")
                 .classed("commit", true)
                 .append('svg:circle')
-                .attr('id', function (d) {
-                    return view.name + '-' + d.id;
-                })
+                .attr('id', idOf)
                 .classed('commit', true)
                 .call(this.fixCirclePosition.bind(this))
                 .attr('r', 1)
@@ -179,14 +179,14 @@ define(['d3'], function () {
 
             var existingPointers = 
                 existingCommits.selectAll('line.commit-pointer')
-                .data(function(c) { return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, function (pair) { return pair[0].id+"-"+pair[1].id; })
+                .data(function(c) { 
+                    return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, 
+                    idOf)
                 
             var newPointers = 
                 existingPointers.enter()
                 .append('svg:line')
-                .attr('id', function (pair) {
-                    return view.name + '-' + pair[0].id + '-to-' + pair[1].id;
-                })
+                .attr('id', idOf)
                 .classed('commit-pointer', true)
                 .attr('x1', function (pair) { return view.trim(view.scale(pair))[0].x})
                 .attr('y1', function (pair) {  return view.trim(view.scale(pair))[0].y})
@@ -226,9 +226,7 @@ define(['d3'], function () {
                 .append("svg:g")
                 .classed("branch", true)
                 .attr('transform', function(t) { var i = branchIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
-                .attr('id', function (t) {
-                    return view.name + '-' + t.id;
-                })
+                .attr('id', idOf)
                 .style("opacity", 0)
             
             newBranches.transition()
@@ -293,9 +291,7 @@ define(['d3'], function () {
                     var index = branchIndexByCommit(h);
                     return "translate(0, " + (2+ index*1.2 )*view.commitRadius +")"
                 })
-                .attr('id', function (t) {
-                    return view.name + '-' + "HEAD";
-                })
+                .attr('id', view.name + "-head")
             head
                 .append("svg:rect")
                 .attr("width", 2.5*view.commitRadius)
@@ -318,7 +314,7 @@ define(['d3'], function () {
                 })
             head
                 .append("svg:text")
-                .text("< HEAD")
+                .text("HEAD")
                 .attr('x', function(h) { 
                     if (h.branchId) {
                         var t = view.branches.find(function(t) { return t.id === h.branchId});
