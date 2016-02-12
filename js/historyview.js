@@ -200,8 +200,23 @@ define(['d3'], function () {
                 .attr('x2', function (pair) { return view.trim(view.scale(pair))[1].x})
                 .attr('y2', function (pair) {  return view.trim(view.scale(pair))[1].y})
 
+
+            var tagIndexByCommit = function(tag) {
+                var pos = 0;
+                for (var i=0; i < view.tags.length; i++) {
+                    var candidate = view.tags[i];
+                    if (candidate.commitId === tag.commitId) {
+                        if (candidate.id === tag.id) {
+                            return pos;
+                        }
+                        pos++;
+                    }
+                }
+                return pos;
+            }
+
             var tags = this.tagBox.selectAll('g.branch-tag')
-                .data(this.tags, function (t) { return t.id; })  
+                .data(this.tags, function (t) { return t.id; })
 
             tags
                 .transition()
@@ -212,7 +227,7 @@ define(['d3'], function () {
             var newTags = tags.enter()
                 .append("svg:g")
                 .classed("branch-tag", true)
-                .attr('transform', "translate(0, " + 2*view.commitRadius +")")
+                .attr('transform', function(t) { var i = tagIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
                 .attr('id', function (t) {
                     return view.name + '-' + t.id;
                 })
@@ -241,7 +256,12 @@ define(['d3'], function () {
             var head = this.tagBox.selectAll('g.head-tag')
                 .data([view.head])
                 .attr('transform', function(h) {
-                    return "translate(" + (h.branchId ? 3 : 0)*view.commitRadius + ", " + 2*view.commitRadius +")"
+                    if (h.branchId) {
+                        var branchIndex = tagIndexByCommit(view.tags.find(function(t) { return t.id === h.branchId}))
+                        return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
+                    }
+                    var index = tagIndexByCommit(h);
+                    return "translate(0, " + (2+ index *1.2 )*view.commitRadius +")"
                 })
                 
             
@@ -268,7 +288,12 @@ define(['d3'], function () {
                 .append("svg:g")
                 .classed("head-tag", true)
                 .attr('transform', function(h) {
-                    return "translate(" + (h.branchId ? 3 : 0)*view.commitRadius + ", " + 2*view.commitRadius +")"
+                    if (h.branchId) {
+                        var branchIndex = tagIndexByCommit(view.tags.find(function(t) { return t.id === h.branchId}))
+                        return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
+                    }
+                    var index = tagIndexByCommit(h);
+                    return "translate(0, " + (2+ index*1.2 )*view.commitRadius +")"
                 })
                 .attr('id', function (t) {
                     return view.name + '-' + "HEAD";
