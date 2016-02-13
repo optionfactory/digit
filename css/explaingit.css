@@ -165,6 +165,10 @@ circle.commit {
     stroke-width: 3;
 }
 
+g.commit.unreachable > * {
+    stroke-dasharray: 5 5;
+}
+
 circle.commit.checked-out {
     fill: #CCFFCC !important;
     stroke: #339900;

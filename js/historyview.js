@@ -21,7 +21,7 @@ define(['d3'], function () {
         this.baseLine = this.height * (config.baseLine || 0.6);
 
         this.commitRadius = config.commitRadius || 20;
-        this.pointerMargin = this.commitRadius * 1.3;
+        this.pointerMargin = this.commitRadius * 1.8;
         this.spacingX = config.spacingX || 100 * 1.5;
         this.spacingY = config.spacingY || -100 * 1.5;
         this.offsetX = 0;
@@ -173,6 +173,7 @@ define(['d3'], function () {
             existingCommits.enter()
                 .append("g")
                 .classed("commit", true)
+                .classed('unreachable', function(c) {return c.unreachable})
                 .append('svg:circle')
                 .attr('id', idOf)
                 .classed('commit', true)

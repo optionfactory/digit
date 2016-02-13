@@ -81,7 +81,8 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
   setTimeout(function() {
     historyView.commitData.push({
         id: "f",
-        parents: ["e"]
+        parents: ["e"],
+        unreachable: true
     })
     historyView.renderCommits();
   }, 3000);
