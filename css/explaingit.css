@@ -50,7 +50,6 @@ span.cmd {
 }
 
 .svg-container {
-    margin-left:250px;
     display: block;
     overflow: auto;
     border: 1px dotted #AAA;

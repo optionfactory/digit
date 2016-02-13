@@ -24,6 +24,7 @@ define(['d3'], function () {
         this.pointerMargin = this.commitRadius * 1.3;
         this.spacingX = config.spacingX || 100 * 1.5;
         this.spacingY = config.spacingY || -100 * 1.5;
+        this.offsetX = 0;
     }
 
     HistoryView.generateId = function () {
@@ -85,7 +86,7 @@ define(['d3'], function () {
             var layers = [];
             for (var i = 0; i < this.commitData.length; i++) {
                 var commit = this.commitData[i];
-                commit.x = 1 + Math.max.apply(Math, [0].concat(commit.parents.map(function(parentId) { return view.getCommit(parentId).x})));
+                commit.x = 1 + Math.max.apply(Math, [view.offsetX].concat(commit.parents.map(function(parentId) { return view.getCommit(parentId).x})));
                 layers[commit.x] = layers[commit.x] || [];
                 layers[commit.x].push(commit);
             }
@@ -116,6 +117,7 @@ define(['d3'], function () {
             this._calculatePositionData();
             this._renderCircles();
             this._renderIdLabels();
+            this.offsetX++;
         },
 
         trim: function(pair) {
@@ -164,7 +166,9 @@ define(['d3'], function () {
             
             existingCommits
                 .select("circle.commit")
-                .attr('id', idOf)
+                .transition()
+                .duration(500)
+                .call(this.fixCirclePosition.bind(this))
 
             existingCommits.enter()
                 .append("g")
@@ -191,6 +195,10 @@ define(['d3'], function () {
                 .data(function(c) { 
                     return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, 
                     idOf)
+
+            existingPointers
+                .transition()
+                .duration(500)
                 .call(makePointPositionSetter(1,0))
                 .call(makePointPositionSetter(2,1))
                 
@@ -230,13 +238,12 @@ define(['d3'], function () {
 
             var refs = this.refBox.selectAll('g.branch,g.tag')
                 .data(view.branches.concat(view.tags), idOf)
+            
+            refs.selectAll("rect,text")
+                .transition()
+                .duration(500)
                 .call(setRefPosition)
 
-            refs
-                .transition()
-                .duration(1000)
-                .call(setRefPosition)
-            
             var newRefs = refs.enter()
                 .append("svg:g")
                 .classed("branch", function(ref) { return view.branches.includes(ref)})
@@ -297,7 +304,13 @@ define(['d3'], function () {
 
             var head = this.refBox.selectAll('g.head')
                 .data([view.head])
+
+            head
+                .transition()
+                .duration(500)
                 .call(setHeadTransform)
+                .selectAll("rect,text")
+                .call(setHeadPosition)
 
             var newHead = head.enter()
                 .append("svg:g")
