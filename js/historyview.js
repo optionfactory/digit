@@ -9,13 +9,13 @@ define(['d3'], function () {
      * @constructor
      */
     function HistoryView(config) {
-        this.commitData = config.commitData;
-        this.branches = config.branches || [];
         this.name = config.name || 'UnnamedHistoryView';
-        this.branches = config.branches;
-        this.tags = config.tags;
-        this.head = config.head;
-
+        this.history = {
+            commits: [],
+            branches: [],
+            tags: [],
+            head: {branchId: "master"}
+        }
         this.width = config.width || "100%";
         this.height = config.height || 400;
         this.baseLine = this.height * (config.baseLine || 0.6);
@@ -53,8 +53,8 @@ define(['d3'], function () {
         },
  
         getCommit: function getCommit(ref) {
-            for (var i = 0; i < this.commitData.length; i++) {
-                var commit = this.commitData[i];
+            for (var i = 0; i < this.history.commits.length; i++) {
+                var commit = this.history.commits[i];
                 if (commit.id === ref) {
                     return commit; 
                 }
@@ -84,8 +84,10 @@ define(['d3'], function () {
         _calculatePositionData: function () {
             var view = this;
             var layers = [];
-            for (var i = 0; i < this.commitData.length; i++) {
-                var commit = this.commitData[i];
+            for (var i = 0; i < this.history.commits.length; i++) {
+                var commit = this.history.commits[i];
+                console.log(commit)
+            
                 commit.x = 1 + Math.max.apply(Math, [view.offsetX].concat(commit.parents.map(function(parentId) { return view.getCommit(parentId).x})));
                 layers[commit.x] = layers[commit.x] || [];
                 layers[commit.x].push(commit);
@@ -117,7 +119,7 @@ define(['d3'], function () {
             this._calculatePositionData();
             this._renderCircles();
             this._renderIdLabels();
-            this.offsetX++;
+            // this.offsetX++;
         },
 
         trim: function(pair) {
@@ -162,7 +164,7 @@ define(['d3'], function () {
             }
 
             var existingCommits = this.commitBox.selectAll('g.commit')
-                .data(this.commitData, idOf)
+                .data(this.history.commits, idOf)
             
             existingCommits
                 .select("circle.commit")
@@ -217,7 +219,7 @@ define(['d3'], function () {
 
 
             var refIndexByCommit = function(ref) {
-                var refs = view.branches.concat(view.tags)
+                var refs = view.history.branches.concat(view.history.tags)
                 var pos = 0;
                 for (var i=0; i < refs.length; i++) {
                     var candidate = refs[i];
@@ -238,7 +240,7 @@ define(['d3'], function () {
             }
 
             var refs = this.refBox.selectAll('g.branch,g.tag')
-                .data(view.branches.concat(view.tags), idOf)
+                .data(view.history.branches.concat(view.history.tags), idOf)
             
             refs.selectAll("rect,text")
                 .transition()
@@ -247,8 +249,8 @@ define(['d3'], function () {
 
             var newRefs = refs.enter()
                 .append("svg:g")
-                .classed("branch", function(ref) { return view.branches.includes(ref)})
-                .classed("tag", function(ref) { return view.tags.includes(ref)})
+                .classed("branch", function(ref) { return view.history.branches.includes(ref)})
+                .classed("tag", function(ref) { return view.history.tags.includes(ref)})
                 .attr('transform', function(t) { var i = refIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
                 .attr('id', idOf)
                 .style("opacity", 0)
@@ -275,7 +277,7 @@ define(['d3'], function () {
                 return sel
                     .attr('x', function(h) { 
                         if (h.branchId) {
-                            var t = view.branches.find(function(t) { return t.id === h.branchId});
+                            var t = view.history.branches.find(function(t) { return t.id === h.branchId});
                             return view.getCommit(t.commitId).x * view.spacingX;
                         } else {
                             return view.getCommit(h.commitId).x * view.spacingX;
@@ -283,7 +285,7 @@ define(['d3'], function () {
                     })
                     .attr('y', function(h) { 
                         if (h.branchId) {
-                            var t = view.branches.find(function(t) { return t.id === h.branchId});
+                            var t = view.history.branches.find(function(t) { return t.id === h.branchId});
                             return view.getCommit(t.commitId).y * view.spacingY;
                         } else {
                             return view.getCommit(h.commitId).y * view.spacingY;
@@ -295,7 +297,7 @@ define(['d3'], function () {
                 return sel
                     .attr('transform', function(h) {
                         if (h.branchId) {
-                            var branchIndex = refIndexByCommit(view.branches.find(function(t) { return t.id === h.branchId}))
+                            var branchIndex = refIndexByCommit(view.history.branches.find(function(t) { return t.id === h.branchId}))
                             return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
                         }
                         var index = refIndexByCommit(h);
@@ -304,7 +306,7 @@ define(['d3'], function () {
             }
 
             var head = this.refBox.selectAll('g.head')
-                .data([view.head])
+                .data([view.history.head].filter(function(h) { return h.commitId || view.getCommit(h.branchId) != null}))
 
             head
                 .transition()
@@ -333,7 +335,7 @@ define(['d3'], function () {
         },
 
         _renderIdLabels: function () {
-            this._renderText('id-label', function (d) { return d.id; }, 14);
+            this._renderText('id-label', function (d) { return d.id.substr(0,6); }, 14);
             this._renderText('message-label', function (d) { return d.message; }, 24);
         },
 
@@ -343,7 +345,7 @@ define(['d3'], function () {
                 newtexts;
 
             existingTexts = this.commitBox.selectAll('text.' + className)
-                .data(this.commitData, function (d) { return d.id; })
+                .data(this.history.commits, function (d) { return d.id; })
                 .text(getText);
 
             existingTexts.transition().call(this.fixIdPosition.bind(this), delta);

@@ -55,36 +55,17 @@ require.config({
 });
 
 require(['historyview', 'd3'], function (HistoryView, d3) {
-  historyView = new HistoryView({
-    commitData: [{
-        id: "a",
-        parents: []
-    },{
-        id: "b",
-        parents: ["a"]
-    },{
-        id: "c",
-        parents: ["a"]
-    },{
-        id: "d",
-        parents: ["b", "c"]
-    },{
-        id: "e",
-        parents: ["b"]
-    }],
-    branches: [{ id: "master", commitId: "d"},{ id: "cario", commitId: "d"},{ id: "laxssa", commitId: "d"},{ id: "xxx", commitId: "e"}],
-    tags: [{ id: "_master", commitId: "d"},{ id: "_cario", commitId: "d"},{ id: "_laxssa", commitId: "d"},{ id: "_xxx", commitId: "e"}],
-    name: "test",
-    head: { branchId: "cario"}
-  });
-  historyView.render(d3.select(".container"));
-  setTimeout(function() {
-    historyView.commitData.push({
-        id: "f",
-        parents: ["e"],
-        unreachable: true
-    })
-    historyView.renderCommits();
-  }, 3000);
+      historyView = new HistoryView({name: "test"});
+    historyView.render(d3.select(".container"));
+    setInterval(function() {
+        var lastJson
+        d3.text("/status.json", function(error, text) {
+            if (error) return console.warn(error);
+            var json = JSON.parse(text);
+            console.log(json)
+            historyView.history = json;
+            historyView.renderCommits();
+        });    
+    }, 1000);
 
 });
