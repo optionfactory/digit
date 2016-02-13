@@ -219,12 +219,20 @@ text.message-label {
     text-anchor: middle;
     font-family: Courier New;
     fill: #666;
+  
     font-size: 10px;
 }
-
 g.branch > rect {
-	fill: #FFCC66;
-	stroke: #CC9900;
+    fill: #FFCC66;
+    stroke: #CC9900;
+}
+
+g.tag > rect {
+    fill: #33CC66;
+    stroke: #009900;
+}
+
+g.branch > rect, g.tag > rect {
 	stroke-width: 2;
     transform: translate(-50%, -65%);
 }
@@ -239,7 +247,7 @@ g.branch.remote-branch > rect {
 	stroke: #888;
 }
 
-g.branch > text {
+g.branch > text, g.tag > text {
 	text-anchor: middle;
 	fill: #000;
 	font-size: 11px;

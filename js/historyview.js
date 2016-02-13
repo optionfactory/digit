@@ -13,6 +13,7 @@ define(['d3'], function () {
         this.branches = config.branches || [];
         this.name = config.name || 'UnnamedHistoryView';
         this.branches = config.branches;
+        this.tags = config.tags;
         this.head = config.head;
 
         this.width = config.width || "100%";
@@ -177,7 +178,7 @@ define(['d3'], function () {
                 .duration(500)
                 .attr('r', this.commitRadius)
 
-            var pointSetter = function(dstIdx, srcIdx) {
+            var makePointPositionSetter = function(dstIdx, srcIdx) {
                 return function(sel, pair) {
                     return sel
                         .attr('x'+dstIdx, function (pair) { return view.trim(view.scale(pair))[srcIdx].x})
@@ -190,28 +191,29 @@ define(['d3'], function () {
                 .data(function(c) { 
                     return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, 
                     idOf)
-                .call(pointSetter(1,0))
-                .call(pointSetter(2,1))
+                .call(makePointPositionSetter(1,0))
+                .call(makePointPositionSetter(2,1))
                 
             var newPointers = 
                 existingPointers.enter()
                 .append('svg:line')
                 .attr('id', idOf)
                 .classed('commit-pointer', true)
-                .call(pointSetter(1,0))
-                .call(pointSetter(2,0))
+                .call(makePointPositionSetter(1,0))
+                .call(makePointPositionSetter(2,0))
                 .attr('marker-end', REG_MARKER_END)
                 .transition()
                 .duration(500)
-                .call(pointSetter(2,1))
+                .call(makePointPositionSetter(2,1))
 
 
-            var branchIndexByCommit = function(branch) {
+            var refIndexByCommit = function(ref) {
+                var refs = view.branches.concat(view.tags)
                 var pos = 0;
-                for (var i=0; i < view.branches.length; i++) {
-                    var candidate = view.branches[i];
-                    if (candidate.commitId === branch.commitId) {
-                        if (candidate.id === branch.id) {
+                for (var i=0; i < refs.length; i++) {
+                    var candidate = refs[i];
+                    if (candidate.commitId === ref.commitId) {
+                        if (candidate.id === ref.id) {
                             return pos;
                         }
                         pos++;
@@ -220,124 +222,99 @@ define(['d3'], function () {
                 return pos;
             }
 
-            var branches = this.refBox.selectAll('g.branch')
-                .data(this.branches, function (t) { return t.id; })
+            var setRefPosition = function(sel) {
+                return sel
+                    .attr('x', function(r) { return view.getCommit(r.commitId).x * view.spacingX;})
+                    .attr('y', function(r) { return view.getCommit(r.commitId).y * view.spacingY;})
+            }
 
-            branches
+            var refs = this.refBox.selectAll('g.branch,g.tag')
+                .data(view.branches.concat(view.tags), idOf)
+                .call(setRefPosition)
+
+            refs
                 .transition()
                 .duration(1000)
-                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
-                .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
+                .call(setRefPosition)
             
-            var newBranches = branches.enter()
+            var newRefs = refs.enter()
                 .append("svg:g")
-                .classed("branch", true)
-                .attr('transform', function(t) { var i = branchIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
+                .classed("branch", function(ref) { return view.branches.includes(ref)})
+                .classed("tag", function(ref) { return view.tags.includes(ref)})
+                .attr('transform', function(t) { var i = refIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
                 .attr('id', idOf)
                 .style("opacity", 0)
             
-            newBranches.transition()
-                .delay(1000)
+            newRefs.transition()
+                .delay(300)
                 .duration(500)
                 .style("opacity", 1)
 
-            newBranches
+            newRefs
                 .append("svg:rect")
                 .attr("width", 2.5*view.commitRadius)
                 .attr("height", view.commitRadius)
-                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
-                .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
+                .call(setRefPosition)
             
-            newBranches
+            newRefs
                 .append("svg:text")
                 .attr("width", 2.5*view.commitRadius)
                 .attr("height", view.commitRadius)
-                .attr('x', function(t) { return view.getCommit(t.commitId).x * view.spacingX;})
-                .attr('y', function(t) { return view.getCommit(t.commitId).y * view.spacingY;})
+                .call(setRefPosition)
                 .text(function(t) { return t.id} )
+
+            var setHeadPosition = function(sel) {
+                return sel
+                    .attr('x', function(h) { 
+                        if (h.branchId) {
+                            var t = view.branches.find(function(t) { return t.id === h.branchId});
+                            return view.getCommit(t.commitId).x * view.spacingX;
+                        } else {
+                            return view.getCommit(h.commitId).x * view.spacingX;
+                        }
+                    })
+                    .attr('y', function(h) { 
+                        if (h.branchId) {
+                            var t = view.branches.find(function(t) { return t.id === h.branchId});
+                            return view.getCommit(t.commitId).y * view.spacingY;
+                        } else {
+                            return view.getCommit(h.commitId).y * view.spacingY;
+                        }
+                    })
+            }
+
+            var setHeadTransform = function(sel) {
+                return sel
+                    .attr('transform', function(h) {
+                        if (h.branchId) {
+                            var branchIndex = refIndexByCommit(view.branches.find(function(t) { return t.id === h.branchId}))
+                            return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
+                        }
+                        var index = refIndexByCommit(h);
+                        return "translate(0, " + (2+ index *1.2 )*view.commitRadius +")"
+                    })
+            }
 
             var head = this.refBox.selectAll('g.head')
                 .data([view.head])
-                .attr('transform', function(h) {
-                    if (h.branchId) {
-                        var branchIndex = branchIndexByCommit(view.branches.find(function(t) { return t.id === h.branchId}))
-                        return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
-                    }
-                    var index = branchIndexByCommit(h);
-                    return "translate(0, " + (2+ index *1.2 )*view.commitRadius +")"
-                })
-                
-            
-            head
-                .select("text")
-                .attr('x', function(h) { 
-                    if (h.branchId) {
-                        var t = view.branches.find(function(t) { return t.id === h.branchId});
-                        return view.getCommit(t.commitId).x * view.spacingX;
-                    } else {
-                        return view.getCommit(h.commitId).x * view.spacingX;
-                    }
-                })
-                .attr('y', function(h) { 
-                    if (h.branchId) {
-                        var t = view.branches.find(function(t) { return t.id === h.branchId});
-                        return view.getCommit(t.commitId).y * view.spacingY;
-                    } else {
-                        return view.getCommit(h.commitId).y * view.spacingY;
-                    }
-                })
+                .call(setHeadTransform)
 
-            head.enter()
+            var newHead = head.enter()
                 .append("svg:g")
                 .classed("head", true)
-                .attr('transform', function(h) {
-                    if (h.branchId) {
-                        var branchIndex = branchIndexByCommit(view.branches.find(function(t) { return t.id === h.branchId}))
-                        return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
-                    }
-                    var index = branchIndexByCommit(h);
-                    return "translate(0, " + (2+ index*1.2 )*view.commitRadius +")"
-                })
                 .attr('id', view.name + "-head")
-            head
+                .call(setHeadTransform)
+            
+            newHead
                 .append("svg:rect")
                 .attr("width", 2.5*view.commitRadius)
                 .attr("height", view.commitRadius)
-                .attr('x', function(h) { 
-                    if (h.branchId) {
-                        var t = view.branches.find(function(t) { return t.id === h.branchId});
-                        return view.getCommit(t.commitId).x * view.spacingX;
-                    } else {
-                        return view.getCommit(h.commitId).x * view.spacingX;
-                    }
-                })
-                .attr('y', function(h) { 
-                    if (h.branchId) {
-                        var t = view.branches.find(function(t) { return t.id === h.branchId});
-                        return view.getCommit(t.commitId).y * view.spacingY;
-                    } else {
-                        return view.getCommit(h.commitId).y * view.spacingY;
-                    }
-                })
-            head
+                .call(setHeadPosition)
+
+            newHead
                 .append("svg:text")
+                .call(setHeadPosition)
                 .text("HEAD")
-                .attr('x', function(h) { 
-                    if (h.branchId) {
-                        var t = view.branches.find(function(t) { return t.id === h.branchId});
-                        return view.getCommit(t.commitId).x * view.spacingX;
-                    } else {
-                        return view.getCommit(h.commitId).x * view.spacingX;
-                    }
-                })
-                .attr('y', function(h) { 
-                    if (h.branchId) {
-                        var t = view.branches.find(function(t) { return t.id === h.branchId});
-                        return view.getCommit(t.commitId).y * view.spacingY;
-                    } else {
-                        return view.getCommit(h.commitId).y * view.spacingY;
-                    }
-                })
 
         },
 
