@@ -80,14 +80,17 @@ define(['d3'], function () {
             this.refBox = this.translator.append('svg:g').classed('refs', true);
             this.renderCommits();
         },
+        update: function (history) {
+            this.history = history;
+            this.renderCommits();
+        },
 
         _calculatePositionData: function () {
             var view = this;
             var layers = [];
             for (var i = 0; i < this.history.commits.length; i++) {
                 var commit = this.history.commits[i];
-                console.log(commit)
-            
+                
                 commit.x = 1 + Math.max.apply(Math, [view.offsetX].concat(commit.parents.map(function(parentId) { return view.getCommit(parentId).x})));
                 layers[commit.x] = layers[commit.x] || [];
                 layers[commit.x].push(commit);
@@ -243,6 +246,7 @@ define(['d3'], function () {
                 .data(view.history.branches.concat(view.history.tags), idOf)
             
             refs.selectAll("rect,text")
+                .data(function(t) { return [t,t];})
                 .transition()
                 .duration(500)
                 .call(setRefPosition)
@@ -306,13 +310,23 @@ define(['d3'], function () {
             }
 
             var head = this.refBox.selectAll('g.head')
-                .data([view.history.head].filter(function(h) { return h.commitId || view.getCommit(h.branchId) != null}))
+                .data([view.history.head].filter(
+                    function(h) { 
+                        if (h.commitId) { 
+                            return view.getCommit(h.commitId);
+                        }
+                        return view.history.branches.find(function(b){ return b.id === h.branchId})
+                    }))
 
             head
                 .transition()
                 .duration(500)
                 .call(setHeadTransform)
-                .selectAll("rect,text")
+            head
+                .selectAll("rect, text")
+                .data(function(d) { return [d,d];})
+                .transition()
+                .duration(500)
                 .call(setHeadPosition)
 
             var newHead = head.enter()

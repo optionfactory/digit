@@ -61,10 +61,8 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
         var lastJson
         d3.text("/status.json", function(error, text) {
             if (error) return console.warn(error);
-            var json = JSON.parse(text);
-            console.log(json)
-            historyView.history = json;
-            historyView.renderCommits();
+            var history = JSON.parse(text);
+            historyView.update(history);
         });    
     }, 1000);
 
