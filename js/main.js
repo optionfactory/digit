@@ -64,5 +64,8 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
             historyView.update(JSON.parse(evt.data));
         };
     };
+    socket.onerror = function() {
+        window.location.reload();
+    }
 
 });
