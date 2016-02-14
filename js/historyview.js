@@ -202,6 +202,8 @@ define(['d3'], function () {
                 }; 
             } 
 
+            // TODO: manage removal (gc, deletion of tags, branches)
+
             d3.select(this.svg.node().parentNode)
                 .transition()
                 .duration(1000) 
