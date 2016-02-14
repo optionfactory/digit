@@ -164,6 +164,15 @@ circle.commit {
     stroke: #888888;
     stroke-width: 3;
 }
+g.commit > .message {
+    display: none;
+    transform: translate(30px, -60px);
+}
+
+g.commit:hover > .message {
+    display: initial;
+}
+
 
 g.commit.unreachable > circle {
     stroke-dasharray: 5 5;

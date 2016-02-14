@@ -216,6 +216,11 @@ define(['d3'], function () {
                 .data(this.history.commits, idOf)
                 .classed('unreachable', function(c) {return c.unreachable})
                 
+            var setMsgPosition = function(sel) {
+                return sel
+                    .attr('x', function(c) { return c.x * view.spacingX;})
+                    .attr('y', function(c) { return c.y * view.spacingY;})
+            }
             
             existingCommits
                 .select("circle.commit")
@@ -223,10 +228,16 @@ define(['d3'], function () {
                 .duration(500)
                 .call(this.fixCirclePosition.bind(this))
 
-            existingCommits.enter()
+            existingCommits
+                .select("text.message")
+                .call(setMsgPosition)
+
+            var newCommits = existingCommits.enter()
                 .append("g")
                 .classed("commit", true)
                 .classed('unreachable', function(c) {return c.unreachable})
+
+            newCommits
                 .append('svg:circle')
                 .attr('id', idOf)
                 .classed('commit', true)
@@ -235,6 +246,20 @@ define(['d3'], function () {
                 .transition("inflate")
                 .duration(500)
                 .attr('r', this.commitRadius)
+
+            newCommits
+                .append('svg:text')
+                .classed('message', true)
+                .attr("width", 10*view.commitRadius)
+                .attr("height", 2*view.commitRadius)
+                .call(setMsgPosition)
+                .text(function(t) { return t.message} )
+                
+            var existingLabels = 
+                existingCommits.selectAll('line.commit-pointer')
+                .data(function(c) { 
+                    return c.parents.map(function(p) {return [c,view.getCommit(p)]})}, 
+                    idOf)
 
             var makePointPositionSetter = function(dstIdx, srcIdx) {
                 return function(sel, pair) {
@@ -399,7 +424,7 @@ define(['d3'], function () {
 
         _renderIdLabels: function () {
             this._renderText('id-label', function (d) { return d.id.substr(0,6); }, 14);
-            this._renderText('message-label', function (d) { return d.message; }, 24);
+            // this._renderText('message-label', function (d) { return d.message; }, 24);
         },
 
         _renderText: function(className, getText, delta) {

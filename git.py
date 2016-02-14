@@ -63,8 +63,8 @@ def sendData():
 class MyEventHandler(FileSystemEventHandler):
     
     def on_any_event(self, event):
-        GET_REACHABLES="git log --pretty='%H %P' --reverse --all"
-        GET_UNREACHABLES="git rev-list --no-walk --pretty='%H %P' $(git fsck --unreachable --no-reflogs --no-progress | awk '{print $3}') | grep -v commit"
+        GET_REACHABLES="git log --pretty='%H %P|%s' --reverse --all"
+        GET_UNREACHABLES="git rev-list --no-walk --pretty='%H %P|%s' $(git fsck --unreachable --no-reflogs --no-progress | awk '{print $3}') | grep -v commit"
         GET_TAGS="git show-ref --tags"
         GET_BRANCHES="git show-ref --heads"
         GET_REMOTE_BRANCHES="git show-ref | grep refs/remotes/"
@@ -77,9 +77,10 @@ class MyEventHandler(FileSystemEventHandler):
             for line in subprocess.check_output(cmd, shell=True).split("\n"):
                 if not len(line):
                     continue
-                hashes = line.split(" ")
+                ids, message = line.split("|", 1)
+                hashes = ids.split(" ")
                 hash, parents = hashes[0], [p for p in hashes[1:] if len(p) > 0]
-                history["commits"].append({"id": hash, "unreachable": unreachable, "parents": parents}) 
+                history["commits"].append({"id": hash, "unreachable": unreachable, "parents": parents, "message": message}) 
 
         readCommits(GET_REACHABLES)
         readCommits(GET_UNREACHABLES, True)
