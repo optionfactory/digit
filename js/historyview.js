@@ -103,8 +103,12 @@ define(['d3'], function () {
                     var commit = layer[i];
                     var parentSlots = commit.parents.map(function(parentId) { return view.getCommit(parentId).y}).sort().reverse();
                     var opts = parentSlots.filter(slots.includes.bind(slots)).concat(slots);
-                    // ignore slots which would cause pointers to overlap non-parent commits
-                    opts = opts.filter(function(o) { 
+                    opts = opts.filter(function(o) {
+                        // ignore slots where multiple parents lay
+                        if (parentSlots.filter(function(p) { return p === o}).length >1) {
+                            return false;
+                        }
+                        // ignore slots which would cause pointers to overlap non-parent commits
                         if (parentSlots.includes(o) 
                             && l > 0 && layers[l-1][o] 
                             && !commit.parents.includes(layers[l-1][o].id)) {
