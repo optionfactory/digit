@@ -137,8 +137,8 @@ define(['d3'], function () {
                 }
             }
             this._calculatePositionData();
-            var graphWidth = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x}))) * this.spacingX
-            var scrollOffset = -1 * Math.max(0, graphWidth + this.spacingX- this.svg.node().width.baseVal.value);
+            // var graphWidth = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x}))) * this.spacingX
+            // var scrollOffset = -1 * Math.max(0, graphWidth + this.spacingX- this.svg.node().width.baseVal.value);
             this.translator.attr('transform', 'translate('+ 0+ ', '+ this.baseLine + ') scale(1)');
             this._renderCircles();
             this._renderIdLabels();
@@ -190,7 +190,7 @@ define(['d3'], function () {
         _renderCircles: function () {
             var view = this;
             var maxX = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x})))
-            var scrollOffset = Math.max(0, ((view._getHead() ? view._getHead().x : maxX) + 1) * view.spacingX - this.svg.node().parentNode.clientWidth);
+            var scrollOffset = Math.max(0, ((view._getHead() ? view._getHead().x : maxX) + 4) * view.spacingX - this.svg.node().parentNode.clientWidth);
             
             this.svg.attr("width", (maxX + 1) * this.spacingX);
                 
