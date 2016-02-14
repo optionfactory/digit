@@ -158,14 +158,25 @@ define(['d3'], function () {
                     y: pair[1].y * view.spacingY
                 }]; 
         },
+        _getHead: function() {
+            var h = this.history.head,
+            view = this;
+            if (h.branchId) {
+                var t = view.history.branches.find(function(t) { return t.id === h.branchId});
+                
+                return t ? view.getCommit(t.commitId) : null;
+            }
+            return view.getCommit(h.commitId);
+            
+        },
 
         _renderCircles: function () {
             var view = this;
-            var graphWidth = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x}))) * this.spacingX
-            var scrollOffset = Math.max(0, graphWidth + this.spacingX- this.svg.node().parentNode.clientWidth);
+            var maxX = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x})))
+            var scrollOffset = Math.max(0, ((view._getHead() ? view._getHead().x : maxX) + 1) * view.spacingX - this.svg.node().parentNode.clientWidth);
             
-            this.svg.attr("width", graphWidth + this.spacingX);
-            console.log(scrollOffset);
+            this.svg.attr("width", (maxX + 1) * this.spacingX);
+            
             d3.select(this.svg.node().parentNode)
                 .property("scrollLeft", scrollOffset);
             
