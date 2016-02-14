@@ -176,10 +176,19 @@ define(['d3'], function () {
             var scrollOffset = Math.max(0, ((view._getHead() ? view._getHead().x : maxX) + 1) * view.spacingX - this.svg.node().parentNode.clientWidth);
             
             this.svg.attr("width", (maxX + 1) * this.spacingX);
-            
+                
+
+            function scrollLeftTween(scrollLeft) { 
+                return function() { 
+                    var i = d3.interpolateNumber(this.scrollLeft, scrollLeft); 
+                    return function(t) { this.scrollLeft = i(t); }; 
+                }; 
+            } 
+
             d3.select(this.svg.node().parentNode)
-                .property("scrollLeft", scrollOffset);
-            
+                .transition()
+                .duration(1000) 
+                .tween("mario", scrollLeftTween(scrollOffset)) 
 
             var idOf = function(e) {
                 if (Array.isArray(e)) {
