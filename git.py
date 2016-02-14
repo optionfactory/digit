@@ -10,9 +10,12 @@ from twisted.web.static import File
 
 import subprocess
 import json
+import time
 
 connections = []
 data = {"history": None}
+pending = False
+lastSent = 0
 
 class MyServerProtocol(WebSocketServerProtocol):
 
@@ -38,6 +41,25 @@ class MyServerProtocol(WebSocketServerProtocol):
 
         print("WebSocket connection closed: {}".format(reason))
 
+def updateData(history):
+    print "history is", history
+    global data, pending, lastSent
+    data["history"] = history
+    pending = True
+    sendData()
+
+def sendData():
+    global data, pending, lastSent
+    now = time.time()
+    if (not pending):
+        return
+    if (now - lastSent > 1):
+        lastSent = time.time()
+        pending = False
+        for c in connections:
+            c.sendMessage(data["history"], False)
+    else:
+        reactor.callLater(1-(now-lastSent), sendData)
 
 class MyEventHandler(FileSystemEventHandler):
     
@@ -84,14 +106,9 @@ class MyEventHandler(FileSystemEventHandler):
             history["head"] = {"branchId": head}
         except:
             head = subprocess.check_output(GET_HEAD_COMMIT, shell=True).strip().split(" ")[0]
-            history["head"] = {"commitId": head}
-
-        data["history"] = json.dumps(history)
-        print "setting data to", data
-        def send():
-            for c in connections:
-                c.sendMessage(data["history"], False)
-        reactor.callFromThread(send)
+            history["head"] = {"commitId": head}        
+        
+        reactor.callFromThread(updateData, json.dumps(history))
 
 
 if __name__ == '__main__':
@@ -113,7 +130,6 @@ if __name__ == '__main__':
 
     event_handler = MyEventHandler()
     event_handler.on_any_event(None)
-    print data
     observer = Observer()
     observer.schedule(event_handler, ".git", recursive=True)
     observer.start()
