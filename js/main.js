@@ -55,15 +55,14 @@ require.config({
 });
 
 require(['historyview', 'd3'], function (HistoryView, d3) {
-      historyView = new HistoryView({name: "test"});
+    historyView = new HistoryView({name: "test"});
     historyView.render(d3.select(".container"));
-    setInterval(function() {
-        var lastJson
-        d3.text("/status.json", function(error, text) {
-            if (error) return console.warn(error);
-            var history = JSON.parse(text);
-            historyView.update(history);
-        });    
-    }, 1000);
+    
+    var socket = new WebSocket("ws://localhost:9000/ws");
+    socket.onopen = function () {
+        socket.onmessage = function (evt) {
+            historyView.update(JSON.parse(evt.data));
+        };
+    };
 
 });

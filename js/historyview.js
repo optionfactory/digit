@@ -87,6 +87,7 @@ define(['d3'], function () {
 
         _calculatePositionData: function () {
             var view = this;
+
             var layers = [];
             for (var i = 0; i < this.history.commits.length; i++) {
                 var commit = this.history.commits[i];
@@ -118,8 +119,11 @@ define(['d3'], function () {
                     this.svg.attr('height', baseLineCalcHeight);
                 }
             }
-            this.translator.attr('transform', 'translate(0, '+ this.baseLine + ') scale(1)');
             this._calculatePositionData();
+            var graphWidth = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x}))) * this.spacingX
+            var scrollOffset = -1 * Math.max(0, graphWidth + this.spacingX- this.svg.node().width.baseVal.value);
+            this.svg.attr("width", graphWidth + this.spacingX);
+            this.translator.attr('transform', 'translate('+ 0+ ', '+ this.baseLine + ') scale(1)');
             this._renderCircles();
             this._renderIdLabels();
             // this.offsetX++;
