@@ -55,7 +55,7 @@ require.config({
 });
 
 require(['historyview', 'd3'], function (HistoryView, d3) {
-    historyView = new HistoryView({name: "test"});
+    historyView = new HistoryView({name: "test", height: document.documentElement.clientHeight -10});
     historyView.render(d3.select(".container"));
     
     var socket = new WebSocket("ws://localhost:9000/ws");

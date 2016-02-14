@@ -18,12 +18,14 @@ define(['d3'], function () {
         }
         this.width = config.width || "100%";
         this.height = config.height || 400;
-        this.baseLine = this.height * (config.baseLine || 0.6);
-
+        
         this.commitRadius = config.commitRadius || 20;
         this.pointerMargin = this.commitRadius * 1.8;
         this.spacingX = config.spacingX || 100 * 1.5;
         this.spacingY = config.spacingY || -100 * 1.5;
+
+        this.baseLine = config.baseLine || (this.height - 4*this.commitRadius)
+
         this.offsetX = 0;
     }
 
