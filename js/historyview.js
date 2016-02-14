@@ -210,6 +210,8 @@ define(['d3'], function () {
 
             var existingCommits = this.commitBox.selectAll('g.commit')
                 .data(this.history.commits, idOf)
+                .classed('unreachable', function(c) {return c.unreachable})
+                
             
             existingCommits
                 .select("circle.commit")
