@@ -96,17 +96,28 @@ define(['d3'], function () {
                 layers[commit.x] = layers[commit.x] || [];
                 layers[commit.x].push(commit);
             }
-            layers.forEach(function(layer) {
+            for (var l = 1; l < layers.length; l++) {
+                var layer = layers[l];
                 var slots = layer.map(function(_,i) { return i});
                 for (var i = 0; i < layer.length; i++) {
                     var commit = layer[i];
                     var parentSlots = commit.parents.map(function(parentId) { return view.getCommit(parentId).y}).sort().reverse();
                     var opts = parentSlots.filter(slots.includes.bind(slots)).concat(slots);
-                    var slot = opts[0];
+                    // ignore slots which would cause pointers to overlap non-parent commits
+                    opts = opts.filter(function(o) { 
+                        if (parentSlots.includes(o) 
+                            && l > 0 && layers[l-1][o] 
+                            && !commit.parents.includes(layers[l-1][o].id)) {
+                            return false;
+                        }
+                        return true;
+                    })
+                    // assign an available slot, or create a new one
+                    var slot = opts.length ? opts[0] : layer.length;
                     commit.y = slot;
                     slots.splice(slots.indexOf(slot), 1);
                 }
-            });
+            };
         },
 
         renderCommits: function () {
