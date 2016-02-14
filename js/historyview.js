@@ -315,13 +315,13 @@ define(['d3'], function () {
 
             newRefs
                 .append("svg:rect")
-                .attr("width", 2.5*view.commitRadius)
+                .attr("width", 3.5*view.commitRadius)
                 .attr("height", view.commitRadius)
                 .call(setRefPosition)
             
             newRefs
                 .append("svg:text")
-                .attr("width", 2.5*view.commitRadius)
+                .attr("width", 3.5*view.commitRadius)
                 .attr("height", view.commitRadius)
                 .call(setRefPosition)
                 .text(function(t) { return t.id} )
@@ -351,7 +351,7 @@ define(['d3'], function () {
                     .attr('transform', function(h) {
                         if (h.branchId) {
                             var branchIndex = refIndexByCommit(view.history.branches.find(function(t) { return t.id === h.branchId}))
-                            return "translate(" + 3*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
+                            return "translate(" + 3.5*view.commitRadius + ", " + (2+branchIndex *1.2 ) *view.commitRadius +")"
                         }
                         var index = refIndexByCommit(h);
                         return "translate(0, " + (2+ index *1.2 )*view.commitRadius +")"
