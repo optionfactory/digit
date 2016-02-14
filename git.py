@@ -83,7 +83,7 @@ class MyEventHandler(FileSystemEventHandler):
                 history["commits"].append({"id": hash, "unreachable": unreachable, "parents": parents}) 
 
         readCommits(GET_REACHABLES)
-        readCommits(GET_UNREACHABLES)
+        readCommits(GET_UNREACHABLES, True)
 
         def readRefs(cmd, key):
             try:
