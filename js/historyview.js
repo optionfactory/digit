@@ -288,6 +288,7 @@ define(['d3'], function () {
 
             var refs = this.refBox.selectAll('g.branch,g.tag')
                 .data(view.history.branches.concat(view.history.tags), idOf)
+                .attr('transform', function(t) { var i = refIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
             
             refs.selectAll("rect,text")
                 .data(function(t) { return [t,t];})
