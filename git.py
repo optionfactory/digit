@@ -42,7 +42,6 @@ class MyServerProtocol(WebSocketServerProtocol):
         print("WebSocket connection closed: {}".format(reason))
 
 def updateData(history):
-    print "history is", history
     global data, pending, lastSent
     data["history"] = history
     pending = True
@@ -65,7 +64,7 @@ class MyEventHandler(FileSystemEventHandler):
     
     def on_any_event(self, event):
         GET_REACHABLES="git log --pretty='%H %P' --reverse --all"
-        GET_UNREACHABLES="git show -s --pretty='%H %P' $(git fsck --unreachable --no-reflogs --no-progress | awk '{print $3}')"
+        GET_UNREACHABLES="git rev-list --no-walk --pretty='%H %P' $(git fsck --unreachable --no-reflogs --no-progress | awk '{print $3}') | grep -v commit"
         GET_TAGS="git show-ref --tags"
         GET_BRANCHES="git show-ref --heads"
         GET_REMOTE_BRANCHES="git show-ref | grep refs/remotes/"
