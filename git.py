@@ -61,15 +61,17 @@ def sendData():
         reactor.callLater(1-(now-lastSent), sendData)
 
 class MyEventHandler(FileSystemEventHandler):
-    
+    def __init__(self, path):
+        self.path = path
+
     def on_any_event(self, event):
-        GET_REACHABLES="git log --pretty='%H %P|%s' --reverse --all"
-        GET_UNREACHABLES="git rev-list --no-walk --pretty='%H %P|%s' $(git fsck --unreachable --no-reflogs --no-progress | awk '{print $3}') | grep -v commit"
-        GET_TAGS="git show-ref --tags"
-        GET_BRANCHES="git show-ref --heads"
-        GET_REMOTE_BRANCHES="git show-ref | grep refs/remotes/"
-        GET_HEAD_COMMIT="git show-ref --head | grep HEAD"
-        GET_HEAD_BRANCH="git symbolic-ref --short HEAD"
+        GET_REACHABLES="git -C {0} log --pretty='%H %P|%s' --reverse --all"
+        GET_UNREACHABLES="git -C {0} rev-list --no-walk --pretty='%H %P|%s' $(git -C {0} fsck --unreachable --no-reflogs --no-progress | awk '{{print $3}}') | grep -v commit"
+        GET_TAGS="git -C {0} show-ref --tags"
+        GET_BRANCHES="git -C {0} show-ref --heads"
+        GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
+        GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
+        GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD"
 
         history = {"commits": [], "tags": [], "branches": [], "head": None}
 
@@ -86,8 +88,8 @@ class MyEventHandler(FileSystemEventHandler):
                 hash, parents = hashes[0], [p for p in hashes[1:] if len(p) > 0]
                 history["commits"].append({"id": hash, "unreachable": unreachable, "parents": parents, "message": message}) 
 
-        readCommits(GET_REACHABLES)
-        readCommits(GET_UNREACHABLES, True)
+        readCommits(GET_REACHABLES.format(self.path))
+        readCommits(GET_UNREACHABLES.format(self.path), True)
 
         def readRefs(cmd, key):
             try:
@@ -101,15 +103,15 @@ class MyEventHandler(FileSystemEventHandler):
                 id = ref.split("/",2)[-1]
                 history[key].append({"id": id, "commitId": hash})
 
-        readRefs(GET_TAGS, "tags")
-        readRefs(GET_BRANCHES, "branches")
-        readRefs(GET_REMOTE_BRANCHES, "branches")
+        readRefs(GET_TAGS.format(self.path), "tags")
+        readRefs(GET_BRANCHES.format(self.path), "branches")
+        readRefs(GET_REMOTE_BRANCHES.format(self.path), "branches")
 
         try:
-            head = subprocess.check_output(GET_HEAD_BRANCH, shell=True).strip()
+            head = subprocess.check_output(GET_HEAD_BRANCH.format(self.path), shell=True).strip()
             history["head"] = {"branchId": head}
         except:
-            head = subprocess.check_output(GET_HEAD_COMMIT, shell=True).strip().split(" ")[0]
+            head = subprocess.check_output(GET_HEAD_COMMIT.format(self.path), shell=True).strip().split(" ")[0]
             history["head"] = {"commitId": head}        
         
         reactor.callFromThread(updateData, json.dumps(history))
@@ -132,7 +134,7 @@ if __name__ == '__main__':
     site = Site(root)
     reactor.listenTCP(9000, site)
 
-    event_handler = MyEventHandler()
+    event_handler = MyEventHandler(sys.argv[1])
     event_handler.on_any_event(None)
     observer = Observer()
     observer.schedule(event_handler, ".git", recursive=True)
