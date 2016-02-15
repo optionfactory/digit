@@ -116,8 +116,20 @@ define(['d3'], function () {
                 layers[commit.x] = layers[commit.x] || [];
                 layers[commit.x].push(commit);
             }
+
+            for (var i = this.history.commits.length - 1; i >= 0; i--) {
+                var commit = this.history.commits[i];
+                commit.d = commit.d || 0;
+                
+                commit.parents.forEach(function(pid) {
+                    p = view.getCommit(pid);
+                    p.d = Math.max((p.d || 0),commit.d + 1);
+                })
+            }
+
             for (var l = 1; l < layers.length; l++) {
                 var layer = layers[l];
+                layer.sort(function(a,b) { return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0)}).reverse()
                 var slots = layer.map(function(_,i) { return i});
                 for (var i = 0; i < layer.length; i++) {
                     var commit = layer[i];
