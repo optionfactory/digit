@@ -74,7 +74,11 @@ class MyEventHandler(FileSystemEventHandler):
         history = {"commits": [], "tags": [], "branches": [], "head": None}
 
         def readCommits(cmd, unreachable=False):
-            for line in subprocess.check_output(cmd, shell=True).split("\n"):
+            try:
+                output = subprocess.check_output(cmd, shell=True)
+            except:
+                output = ""
+            for line in output.split("\n"):
                 if not len(line):
                     continue
                 ids, message = line.split("|", 1)
