@@ -70,10 +70,11 @@ class MyEventHandler(FileSystemEventHandler):
         GET_TAGS="git -C {0} show-ref --tags"
         GET_BRANCHES="git -C {0} show-ref --heads"
         GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
+        GET_STASH="git -C {0} show-ref | grep refs/stash"
         GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
         GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD"
 
-        history = {"commits": [], "tags": [], "branches": [], "head": None}
+        history = {"commits": [], "tags": [], "stash": [], "branches": [], "head": None}
 
         def readCommits(cmd, unreachable=False):
             try:
@@ -106,6 +107,7 @@ class MyEventHandler(FileSystemEventHandler):
         readRefs(GET_TAGS.format(self.path), "tags")
         readRefs(GET_BRANCHES.format(self.path), "branches")
         readRefs(GET_REMOTE_BRANCHES.format(self.path), "branches")
+        readRefs(GET_STASH.format(self.path), "stash")
 
         try:
             head = subprocess.check_output(GET_HEAD_BRANCH.format(self.path), shell=True).strip()

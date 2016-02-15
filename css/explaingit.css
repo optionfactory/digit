@@ -243,12 +243,17 @@ g.branch > rect {
     stroke: #CC9900;
 }
 
+g.stash > rect {
+    fill: #AAAAFF;
+    stroke: #6666AA;
+}
+
 g.tag > rect {
     fill: #33CC66;
     stroke: #009900;
 }
 
-g.branch > rect, g.tag > rect {
+g.branch > rect, g.tag > rect, g.stash > rect{
 	stroke-width: 2;
     transform: translate(-50%, -65%);
 }
@@ -263,7 +268,7 @@ g.branch.remote-branch > rect {
 	stroke: #888;
 }
 
-g.branch > text, g.tag > text {
+g.branch > text, g.tag > text, g.stash > text {
 	text-anchor: middle;
 	fill: #000;
 	font-size: 11px;

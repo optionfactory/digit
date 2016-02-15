@@ -13,6 +13,7 @@ define(['d3'], function () {
         this.history = {
             commits: [],
             branches: [],
+            stash: [],
             tags: [],
             head: {branchId: "master"}
         }
@@ -316,7 +317,7 @@ define(['d3'], function () {
 
 
             var refIndexByCommit = function(ref) {
-                var refs = view.history.branches.concat(view.history.tags)
+                var refs = view.history.branches.concat(view.history.tags).concat(view.history.stash)
                 var pos = 0;
                 for (var i=0; i < refs.length; i++) {
                     var candidate = refs[i];
@@ -336,8 +337,8 @@ define(['d3'], function () {
                     .attr('y', function(r) { return view.getCommit(r.commitId).y * view.spacingY;})
             }
 
-            var refs = this.refBox.selectAll('g.branch,g.tag')
-                .data(view.history.branches.concat(view.history.tags), idOf)
+            var refs = this.refBox.selectAll('g.branch,g.tag,g.stash')
+                .data(view.history.branches.concat(view.history.tags).concat(view.history.stash), idOf)
                 .attr('transform', function(t) { var i = refIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
             
             refs.selectAll("rect,text")
@@ -350,6 +351,7 @@ define(['d3'], function () {
                 .append("svg:g")
                 .classed("branch", function(ref) { return view.history.branches.includes(ref)})
                 .classed("tag", function(ref) { return view.history.tags.includes(ref)})
+                .classed("stash", function(ref) { return view.history.stash.includes(ref)})
                 .attr('transform', function(t) { var i = refIndexByCommit(t); return "translate(0, " + (2+i*1.2) *view.commitRadius +")"})
                 .attr('id', idOf)
                 .style("opacity", 0)
