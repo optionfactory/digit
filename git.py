@@ -136,10 +136,11 @@ if __name__ == '__main__':
     site = Site(root)
     reactor.listenTCP(9000, site)
 
-    event_handler = MyEventHandler(sys.argv[1])
+    path = sys.argv[1]
+    event_handler = MyEventHandler(path)
     event_handler.on_any_event(None)
     observer = Observer()
-    observer.schedule(event_handler, ".git", recursive=True)
+    observer.schedule(event_handler, path+"/.git", recursive=True)
     observer.start()
 
 
