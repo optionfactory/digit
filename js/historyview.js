@@ -24,7 +24,7 @@ define(['d3'], function () {
         this.spacingX = config.spacingX || 100 * 1.5;
         this.spacingY = config.spacingY || -100 * 1.5;
 
-        this.baseLine = config.baseLine || (this.height - 4*this.commitRadius)
+        this.baseLine = config.baseLine || (this.height - 6*this.commitRadius)
 
         this.offsetX = 0;
     }
