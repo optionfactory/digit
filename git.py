@@ -67,7 +67,7 @@ class MyEventHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         GET_REACHABLES="git -C {0} log --pretty='%H %P|%s' --reverse --all"
         GET_UNREACHABLES="git -C {0} rev-list --no-walk --pretty='%H %P|%s' $(git -C {0} fsck --unreachable --no-reflogs --no-progress | awk '{{print $3}}') 2>/dev/null| grep -v commit"
-        GET_TAGS="git -C {0} show-ref --tags"
+        GET_TAGS="git -C {0} show-ref --tags -d"
         GET_BRANCHES="git -C {0} show-ref --heads"
         GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
         GET_STASH="git -C {0} show-ref | grep refs/stash"
@@ -93,6 +93,7 @@ class MyEventHandler(FileSystemEventHandler):
         readCommits(GET_UNREACHABLES.format(self.path), True)
 
         def readRefs(cmd, key):
+            refs = []
             try:
                 output=subprocess.check_output(cmd, shell=True).split("\n")
             except:
@@ -102,7 +103,13 @@ class MyEventHandler(FileSystemEventHandler):
                     continue
                 hash, ref = line.split(" ")
                 id = ref.split("/",2)[-1]
-                history[key].append({"id": id, "commitId": hash})
+                refs.append({"id": id, "commitId": hash})
+            derefs = [r["id"][:-3] for r in refs if r["id"].endswith("^{}")]
+            refs = [r for r in refs if r["id"] not in derefs]
+            for ref in refs:
+                if ref["id"].endswith("^{}"):
+                    ref["id"] = ref["id"][:-3]
+            history[key].extend(refs)
 
         readRefs(GET_TAGS.format(self.path), "tags")
         readRefs(GET_BRANCHES.format(self.path), "branches")
