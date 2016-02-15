@@ -84,6 +84,23 @@ define(['d3'], function () {
         },
         update: function (history) {
             this.history = history;
+            var graph = {};
+            var commits = [];
+            while (this.history.commits.find(function(c) { return !graph[c.id];})) {
+                this.history.commits
+                .filter(function(c) { return !graph[c.id];})
+                .forEach(function(c) {
+                    var parents = c.parents.map(function(pid) {
+                        return graph[pid];
+                    });
+                    if (parents.includes(undefined)) {
+                        return;
+                    }
+                    graph[c.id] = c;
+                    commits.push(c);
+                })
+            }
+            this.history.commits = commits;
             this.renderCommits();
         },
 
