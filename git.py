@@ -11,6 +11,7 @@ from twisted.web.static import File
 import subprocess
 import json
 import time
+import webbrowser
 
 connections = []
 data = {"history": None}
@@ -152,6 +153,7 @@ if __name__ == '__main__':
 
 
     
+    webbrowser.open_new_tab("http://localhost:9000")
     reactor.run()
     observer.stop()
     observer.join()
