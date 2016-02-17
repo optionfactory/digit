@@ -73,7 +73,7 @@ class MyEventHandler(FileSystemEventHandler):
         GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
         GET_STASH="git -C {0} show-ref | grep refs/stash"
         GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
-        GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD"
+        GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD 2>/dev/null"
 
         history = {"commits": [], "tags": [], "stash": [], "branches": [], "head": None}
 

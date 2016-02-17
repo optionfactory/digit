@@ -58,14 +58,20 @@ require(['historyview', 'd3'], function (HistoryView, d3) {
     historyView = new HistoryView({name: "test", height: document.documentElement.clientHeight -10});
     historyView.render(d3.select(".container"));
     
-    var socket = new WebSocket("ws://localhost:9000/ws");
-    socket.onopen = function () {
-        socket.onmessage = function (evt) {
-            historyView.update(JSON.parse(evt.data));
+    function connect() {
+        var socket = new WebSocket("ws://localhost:9000/ws");
+        socket.onopen = function () {
+            socket.onmessage = function (evt) {
+                historyView.update(JSON.parse(evt.data));
+            };
         };
+        socket.onerror = function() {
+            socket.close();
+        }
+        socket.onclose = function() {
+            setTimeout(connect, 1000);
+        }
     };
-    socket.onerror = function() {
-        window.location.reload();
-    }
+    connect();
 
 });
