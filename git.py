@@ -67,7 +67,7 @@ class MyEventHandler(FileSystemEventHandler):
 
     def on_any_event(self, event):
         GET_REACHABLES="git -C {0} log --pretty='%H %P|%s' --reverse --all"
-        GET_UNREACHABLES="git -C {0} rev-list --no-walk --pretty='%H %P|%s' $(git -C {0} fsck --unreachable --no-reflogs --no-progress | awk '{{print $3}}') 2>/dev/null| grep -v commit"
+        GET_UNREACHABLES="git -C {0} rev-list --no-walk --pretty='%H %P|%s' $(git -C {0} fsck --unreachable --no-reflogs --no-progress | awk '{{print $3}}') 2>/dev/null| grep -v '^commit'"
         GET_TAGS="git -C {0} show-ref --tags -d"
         GET_BRANCHES="git -C {0} show-ref --heads"
         GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
