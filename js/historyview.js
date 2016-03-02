@@ -29,11 +29,7 @@ define(['d3'], function () {
 
         this.offsetX = 0;
     }
-
-    HistoryView.generateId = function () {
-        return Math.floor((1 + Math.random()) * 0x10000000).toString(16).substring(1);
-    };
-
+    
     HistoryView.prototype = {
         fixCirclePosition: function (selection) {
             var view = this;
