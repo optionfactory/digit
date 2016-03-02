@@ -29,7 +29,7 @@ define(['d3'], function () {
 
         this.offsetX = 0;
     }
-    
+
     HistoryView.prototype = {
         fixCirclePosition: function (selection) {
             var view = this;
@@ -80,17 +80,24 @@ define(['d3'], function () {
             this.renderCommits();
         },
         update: function (history) {
+            //all this function does is to reoder commits so that you don't have children appearing before their parents in the list, and then call the render function
+            // not necessary if the positioning algorithm does not rely on the commits list to be in incremental order
             this.history = history;
+
             var graph = {};
             var commits = [];
+            var allParentsAreAlreadyInTheGraph = function(node, graph){
+                var parents = node.parents.map(function(pid) {
+                    return graph[pid];
+                });
+                return !parents.includes(undefined);
+            }
+
             while (this.history.commits.find(function(c) { return !graph[c.id];})) {
                 this.history.commits
                 .filter(function(c) { return !graph[c.id];})
                 .forEach(function(c) {
-                    var parents = c.parents.map(function(pid) {
-                        return graph[pid];
-                    });
-                    if (parents.includes(undefined)) {
+                    if (!allParentsAreAlreadyInTheGraph(c, graph)) {
                         return;
                     }
                     graph[c.id] = c;
@@ -154,18 +161,22 @@ define(['d3'], function () {
 
         renderCommits: function () {
             if (typeof this.height === 'string' && this.height.indexOf('%') >= 0) {
+                //Convert percent height in absolute height, and adapt the svg to match it
                 var perc = this.height.substring(0, this.height.length - 1) / 100.0;
-                var baseLineCalcHeight = Math.round(this.svg.node().parentNode.offsetHeight * perc) - 65;
-                var newBaseLine = Math.round(baseLineCalcHeight * (this.originalBaseLine || 0.6));
+                var totalHeightOfSelectionContainer = this.svg.node().parentNode.offsetHeight;
+                var svgHeight = Math.round(totalHeightOfSelectionContainer * perc) - 65; //magic number
+                var newBaseLine = Math.round(svgHeight * 0.6); //magic number
                 if (newBaseLine !== this.baseLine) {
                     this.baseLine = newBaseLine;
-                    this.svg.attr('height', baseLineCalcHeight);
+                    this.svg.attr('height', svgHeight);
                 }
             }
             this._calculatePositionData();
             // var graphWidth = Math.max.apply(null, [0].concat(this.history.commits.map(function(c) {return c.x}))) * this.spacingX
             // var scrollOffset = -1 * Math.max(0, graphWidth + this.spacingX- this.svg.node().width.baseVal.value);
-            this.translator.attr('transform', 'translate('+ 0+ ', '+ this.baseLine + ') scale(1)');
+            var deltaX = 0;
+            var deltaY = this.baseLine;
+            this.translator.attr('transform', 'translate('+ deltaX+ ', '+ deltaY + ') scale(1)');
             this._renderCircles();
             this._renderIdLabels();
             // this.offsetX++;
