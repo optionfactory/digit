@@ -1,0 +1,30 @@
+div .svgContainer {
+    margin: 5px;
+    position: relative;
+}
+
+#local {
+    height: 400px;
+}
+
+.reset {
+    position: absolute;
+    background: url(../graph-alghoritm/demo/reset.png);
+    width: 20px;
+    height: 20px;
+    top: 5px;
+    right: 5px;
+    background-color: Transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
+
+g.commit.unreachable > circle {
+    stroke-dasharray: 5 5;
+}
+g.commit.unreachable > line {
+    stroke-dasharray: 10 15;
+    stroke: #DDDDDD;
+}
