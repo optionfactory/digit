@@ -25,7 +25,7 @@ RepoViewer.prototype = {
         //create a wrapper div to hold svg and buttons together
         var containerDiv = container
             .append("div")
-            .attr("class", "svgContainer");
+            .attr("class", "svg-container");
         var me = this;
 
         this.zoomBehavior = d3.behavior.zoom()
@@ -42,8 +42,9 @@ RepoViewer.prototype = {
         //main svg
         var svg = containerDiv
             .append("svg")
-            .attr("width", me.canvas.width)
-            .attr("height", me.canvas.height)
+            .attr("preserveAspectRatio", "xMinYMin slice")
+            .attr("viewBox", "0 0 1024 768")
+            .classed("svg-content-responsive", true)
             .append("g")
             .call(me.zoomBehavior)
             .on("dblclick.zoom", null);
@@ -73,6 +74,7 @@ RepoViewer.prototype = {
             .attr("height", me.canvas.height);
 
         this.commitsG = this.zoomableCanvas.append("g");
+        this.linksG = this.zoomableCanvas.append("g");
         this.renderItems();
     },
     update: function(history) {
@@ -94,6 +96,17 @@ RepoViewer.prototype = {
             forwardNodeDistributionStrategy: distributionStrategies.horizontalStartingFrom,
             backwardsNodeDistributionStrategy: distributionStrategies.horizontalEndingAt
         });
+        var positionedById = d3.map();
+        positionedData.forEach(function(node) {
+            positionedById.set(node.id, node);
+        });
+
+        var edges = [].concat.apply([], positionedData.map(function(node) {
+            return node.originalNode.parents.map(function(parentId) {
+                return { "source": node, "target": positionedById.get(parentId) }
+            })
+        }));
+
         var commits = this.commitsG
             .selectAll("g")
             .data(positionedData, pluck("id"))
@@ -104,7 +117,8 @@ RepoViewer.prototype = {
             .attr("cx", pluck("x"))
             .attr("cy", pluck("y"))
             .classed('unreachable', function(c) {
-                return c.originalNode.unreachable })
+                return c.originalNode.unreachable
+            })
             .style("fill", function(d) {
                 return color(d.group);
             })
@@ -114,5 +128,40 @@ RepoViewer.prototype = {
                 var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
                 me.zoomableCanvas.transition().attr("transform", "translate(" + [dcx, dcy] + ")scale(" + me.zoomBehavior.scale() + ")");
             });
+        var links = this.linksG
+            .selectAll("g")
+            .data(edges)
+        links.enter()
+            .append("path")
+            .attr("class", "link")
+            .attr("marker-end", "url(#arrow)")
+            .attr("d", function(d) {
+                var path = "";
+                // move to starting node's center
+                path += "M " + (d.source.x - me.commitRadius) + " " + d.source.y + " ";
+                // cubic Bezier curve control points. 
+                var controlPointOffset = Math.abs(d.source.x - d.target.x) / 2;
+                path += "C " + (d.source.x - controlPointOffset) + " " + d.source.y + " ";
+                path += ", " + (d.target.x + controlPointOffset) + " " + d.target.y + " ";
+                // final destination (just right of the destination node)
+                path += ", " + (d.target.x + me.commitRadius) + " " + d.target.y + " ";
+                return path;
+            });
+
+
+        //line ending (arrow symbol)
+        this.zoomableCanvas.append("defs").selectAll("marker")
+            .data(["arrow"])
+            .enter().append("marker")
+            .attr("id", identity)
+            .attr("viewBox", "0 0 10 10")
+            .attr("refX", me.commitRadius / 2)
+            .attr("refY", 5)
+            .attr("markerUnits", "strokeWidth")
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 L 10 5 L 0 10 z");
     }
 }
