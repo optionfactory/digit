@@ -45,7 +45,8 @@ if (!Array.prototype.indexOf) {
 
 require.config({
     paths: {
-        'd3': 'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min'
+ //       'd3': 'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min'
+        'd3': 'js/d3.min'
     },
     shim: {
         'd3': {
