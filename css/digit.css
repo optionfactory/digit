@@ -30,13 +30,24 @@ div .svg-container {
     overflow: hidden;
     outline: none;
 }
-
-.node .unreachable  {
-    stroke-dasharray: 10 15;
+g.commit.unreachable > circle {
+    stroke-dasharray: 5 5;
+}
+g.commit.unreachable > path {
+    stroke-dasharray: 5 5;
     stroke: #DDDDDD;
+}
+
+circle.commit {
+    fill: #CCFFCC !important;
+    stroke: #339900;
 }
 .link {
     stroke: #999;
     stroke-opacity: 1.2;
     fill: none;
+}
+
+text.commitId {
+    text-anchor:middle;
 }

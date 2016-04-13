@@ -34,7 +34,7 @@ RepoViewer.prototype = {
                 t.translate = d3.event.translate;
                 t.scale = d3.event.scale;
                 // We only want to transition on wheel event, without interfering with mouse drag panning
-                var isWheel = d3.event.sourceEvent.type === "wheel";
+                var isWheel = d3.event.sourceEvent&& d3.event.sourceEvent.type === "wheel";
                 var toTransform = isWheel ? me.zoomableCanvas.transition() : me.zoomableCanvas;
 
                 toTransform.attr("transform", t.toString());
@@ -101,37 +101,94 @@ RepoViewer.prototype = {
             positionedById.set(node.id, node);
         });
 
-        var edges = [].concat.apply([], positionedData.map(function(node) {
-            return node.originalNode.parents.map(function(parentId) {
-                return { "source": node, "target": positionedById.get(parentId) }
-            })
-        }));
-
         var commits = this.commitsG
-            .selectAll("g")
+            .selectAll("g.commit")
             .data(positionedData, pluck("id"))
-
-        commits.enter().append("circle")
-            .attr("class", "node")
-            .attr("r", this.commitRadius)
-            .attr("cx", pluck("x"))
-            .attr("cy", pluck("y"))
             .classed('unreachable', function(c) {
                 return c.originalNode.unreachable
             })
-            .style("fill", function(d) {
-                return color(d.group);
-            })
+
+        commits
+            .select("circle.commit")
+            .transition()
+            .duration(500)
+            .attr("cx", pluck("x"))
+            .attr("cy", pluck("y"));
+
+        commits
+            .select("text.commitId")
+            .transition()
+            .duration(500)
+            .attr("x", pluck("x"))
+            .attr("y", function(node) {
+                return node.y - 1.5 * me.commitRadius
+            });
+
+        var newCommits = commits
+            .enter()
+            .append("g")
+            .classed("commit", true)
+            .classed('unreachable', function(c) {
+                return c.originalNode.unreachable
+            });
+
+        newCommits
+            .append("circle")
+            .attr("class", "commit")
+            .attr("r", this.commitRadius)
+            .attr("cx", pluck("x"))
+            .attr("cy", pluck("y"))
             .on("dblclick.zoom", function(d) {
                 d3.event.stopPropagation(); // possibly redundant, as we removed it from the main svg
                 var dcx = (me.canvas.width / 2 - d.x * me.zoomBehavior.scale());
                 var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
                 me.zoomableCanvas.transition().attr("transform", "translate(" + [dcx, dcy] + ")scale(" + me.zoomBehavior.scale() + ")");
+            })
+            .transition("inflate")
+            .duration(500)
+
+        newCommits
+            .append("text")
+            .attr("class", "commitId")
+            .attr("r", this.commitRadius)
+            .attr("x", pluck("x"))
+            .attr("y", function(node) {
+                return node.y - 1.5 * me.commitRadius
+            })
+            .text(function(node) {
+                return node.id.substr(0, 6) 
+            })
+            .transition("inflate")
+            .duration(500)
+
+        commits.exit().remove();
+
+        var links =
+            commits.selectAll('path.link')
+            .data(function(node) {
+                return node.originalNode.parents.map(function(parentId) {
+                    return { source: node, target: positionedById.get(parentId) };
+                });
             });
-        var links = this.linksG
-            .selectAll("g")
-            .data(edges)
-        links.enter()
+
+
+        links.attr("class", "link")
+            .attr("marker-end", "url(#arrow)")
+            .attr("d", function(d) {
+                var path = "";
+                // move to starting node's center
+                path += "M " + (d.source.x - me.commitRadius) + " " + d.source.y + " ";
+                // cubic Bezier curve control points. 
+                var controlPointOffset = Math.abs(d.source.x - d.target.x) / 2;
+                path += "C " + (d.source.x - controlPointOffset) + " " + d.source.y + " ";
+                path += ", " + (d.target.x + controlPointOffset) + " " + d.target.y + " ";
+                // final destination (just right of the destination node)
+                path += ", " + (d.target.x + me.commitRadius) + " " + d.target.y + " ";
+                return path;
+            });
+
+        links
+            .enter()
             .append("path")
             .attr("class", "link")
             .attr("marker-end", "url(#arrow)")
@@ -148,6 +205,7 @@ RepoViewer.prototype = {
                 return path;
             });
 
+        links.exit().remove();
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")
