@@ -1,20 +1,9 @@
 div .svg-container {
     margin: 5px;
-    display: inline-block;
     position: relative;
-    width: 100%;
-    padding-bottom: 100%; /* aspect ratio */
-    vertical-align: top;
-    overflow: hidden;
-}
-.svg-content-responsive {
-    display: inline-block;
-    position: absolute;
-    top: 10px;
-    left: 0;
 }
 #local {
-    height: 200px;
+    height: 400px;
 }
 
 .reset {
@@ -49,5 +38,8 @@ circle.commit {
 }
 
 text.commitId {
+    text-anchor:middle;
+}
+g.ref > text {
     text-anchor:middle;
 }

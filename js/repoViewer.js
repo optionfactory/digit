@@ -34,7 +34,7 @@ RepoViewer.prototype = {
                 t.translate = d3.event.translate;
                 t.scale = d3.event.scale;
                 // We only want to transition on wheel event, without interfering with mouse drag panning
-                var isWheel = d3.event.sourceEvent&& d3.event.sourceEvent.type === "wheel";
+                var isWheel = d3.event.sourceEvent && d3.event.sourceEvent.type === "wheel";
                 var toTransform = isWheel ? me.zoomableCanvas.transition() : me.zoomableCanvas;
 
                 toTransform.attr("transform", t.toString());
@@ -42,12 +42,11 @@ RepoViewer.prototype = {
         //main svg
         var svg = containerDiv
             .append("svg")
-            .attr("preserveAspectRatio", "xMinYMin slice")
-            .attr("viewBox", "0 0 1024 768")
-            .classed("svg-content-responsive", true)
+            .attr("width", me.canvas.width)
+            .attr("height", me.canvas.height)
             .append("g")
             .call(me.zoomBehavior)
-            .on("dblclick.zoom", null);
+            .on("dblclick.zoom", null)
 
         //just some grey background
         var rect = svg.append("rect")
@@ -98,6 +97,23 @@ RepoViewer.prototype = {
         });
         var positionedById = d3.map();
         positionedData.forEach(function(node) {
+            var index = 0;
+            node.refs = me.currentState.branches
+                .filter(function(ref) {
+                    return ref.commitId === node.id
+                }).map(function(ref) {
+                    ref.type = "branch";
+                    ref.position=index++;
+                    return ref;
+                });
+            node.refs.concat(me.currentState.tags
+                .filter(function(ref) {
+                    return ref.commitId === node.id
+                }).map(function(ref) {
+                    ref.type = "tag";
+                    ref.position=index++;
+                    return ref;
+                }));
             positionedById.set(node.id, node);
         });
 
@@ -150,18 +166,58 @@ RepoViewer.prototype = {
         newCommits
             .append("text")
             .attr("class", "commitId")
-            .attr("r", this.commitRadius)
             .attr("x", pluck("x"))
             .attr("y", function(node) {
                 return node.y - 1.5 * me.commitRadius
             })
             .text(function(node) {
-                return node.id.substr(0, 6) 
+                return node.id.substr(0, 6)
             })
             .transition("inflate")
             .duration(500)
 
         commits.exit().remove();
+
+        var refs =
+            commits.selectAll('g.ref')
+            .data(function(node) {
+                return node.refs.map(function(ref) {
+                    ref.node = node;
+                    return ref;
+                });
+            }, pluck("id"))
+            .attr("class", pluck("type"))
+            .classed("ref", true);
+
+        refs
+            .select("text")
+            .attr("x", function(ref) {
+                return ref.node.x
+            })
+            .attr("y", function(ref, i) {
+                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+            })
+            .text(pluck("id"));
+
+        var newRefs = refs
+            .enter()
+            .append("g")
+            .attr("class", pluck("type"))
+            .classed("ref", true);
+
+        newRefs.append("text")
+            .attr("x", function(ref) {
+                return ref.node.x
+            })
+            .attr("y", function(ref) {
+                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+            })
+            .text(pluck("id"));
+
+        refs
+            .exit()
+            .remove();
+
 
         var links =
             commits.selectAll('path.link')
@@ -170,7 +226,6 @@ RepoViewer.prototype = {
                     return { source: node, target: positionedById.get(parentId) };
                 });
             });
-
 
         links.attr("class", "link")
             .attr("marker-end", "url(#arrow)")
