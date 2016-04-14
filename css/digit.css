@@ -40,6 +40,9 @@ circle.commit {
 text.commitId {
     text-anchor:middle;
 }
+text.commitMessage {
+    text-anchor:middle;
+}
 g.ref > text {
     text-anchor:middle;
 }

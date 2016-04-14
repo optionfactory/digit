@@ -168,13 +168,37 @@ RepoViewer.prototype = {
             .attr("class", "commitId")
             .attr("x", pluck("x"))
             .attr("y", function(node) {
-                return node.y - 1.5 * me.commitRadius
+                return node.y - 2.5 * me.commitRadius
             })
             .text(function(node) {
                 return node.id.substr(0, 6)
             })
+            .append("title")
+            .text(function(node) {
+                return node.id;
+            })
             .transition("inflate")
             .duration(500)
+
+        newCommits
+            .append("text")
+            .attr("class", "commitMessage")
+            .attr("x", pluck("x"))
+            .attr("y", function(node) {
+                return node.y - 1.5 * me.commitRadius
+            })
+            .text(function(node) {
+                return node.originalNode.message.length>12?
+                node.originalNode.message.substr(0, 12)+"...":node.originalNode.message;
+            })
+            .append("title")
+            .text(function(node) {
+                return node.originalNode.message;
+            })
+            .transition("inflate")
+            .duration(500)
+
+
 
         commits.exit().remove();
 
