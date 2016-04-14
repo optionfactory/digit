@@ -46,3 +46,14 @@ text.commitMessage {
 g.ref > text {
     text-anchor:middle;
 }
+g.ref > rect {
+    fill-opacity:.3;
+}
+g.ref.branch > rect {
+    fill: #FFCC66;
+    stroke: #CC9900;
+}
+g.ref.tag > rect {
+    fill: #7FC9FF;
+    stroke: #0026FF;
+}

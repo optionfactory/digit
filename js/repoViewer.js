@@ -73,7 +73,6 @@ RepoViewer.prototype = {
             .attr("height", me.canvas.height);
 
         this.commitsG = this.zoomableCanvas.append("g");
-        this.linksG = this.zoomableCanvas.append("g");
         this.renderItems();
     },
     update: function(history) {
@@ -103,15 +102,15 @@ RepoViewer.prototype = {
                     return ref.commitId === node.id
                 }).map(function(ref) {
                     ref.type = "branch";
-                    ref.position=index++;
+                    ref.position = index++;
                     return ref;
                 });
-            node.refs.concat(me.currentState.tags
+            node.refs = node.refs.concat(me.currentState.tags
                 .filter(function(ref) {
                     return ref.commitId === node.id
                 }).map(function(ref) {
                     ref.type = "tag";
-                    ref.position=index++;
+                    ref.position = index++;
                     return ref;
                 }));
             positionedById.set(node.id, node);
@@ -188,8 +187,8 @@ RepoViewer.prototype = {
                 return node.y - 1.5 * me.commitRadius
             })
             .text(function(node) {
-                return node.originalNode.message.length>12?
-                node.originalNode.message.substr(0, 12)+"...":node.originalNode.message;
+                return node.originalNode.message.length > 12 ?
+                    node.originalNode.message.substr(0, 12) + "..." : node.originalNode.message;
             })
             .append("title")
             .text(function(node) {
@@ -198,50 +197,7 @@ RepoViewer.prototype = {
             .transition("inflate")
             .duration(500)
 
-
-
         commits.exit().remove();
-
-        var refs =
-            commits.selectAll('g.ref')
-            .data(function(node) {
-                return node.refs.map(function(ref) {
-                    ref.node = node;
-                    return ref;
-                });
-            }, pluck("id"))
-            .attr("class", pluck("type"))
-            .classed("ref", true);
-
-        refs
-            .select("text")
-            .attr("x", function(ref) {
-                return ref.node.x
-            })
-            .attr("y", function(ref, i) {
-                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
-            })
-            .text(pluck("id"));
-
-        var newRefs = refs
-            .enter()
-            .append("g")
-            .attr("class", pluck("type"))
-            .classed("ref", true);
-
-        newRefs.append("text")
-            .attr("x", function(ref) {
-                return ref.node.x
-            })
-            .attr("y", function(ref) {
-                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
-            })
-            .text(pluck("id"));
-
-        refs
-            .exit()
-            .remove();
-
 
         var links =
             commits.selectAll('path.link')
@@ -285,6 +241,58 @@ RepoViewer.prototype = {
             });
 
         links.exit().remove();
+
+        var refs =
+            commits.selectAll('g.ref')
+            .data(function(node) {
+                return node.refs.map(function(ref) {
+                    ref.node = node;
+                    return ref;
+                });
+            }, pluck("id"))
+            .attr("class", pluck("type"))
+            .classed("ref", true);
+
+        refs
+            .select("text")
+            .attr("class", "refText")
+            .attr("x", function(ref) {
+                return ref.node.x
+            })
+            .attr("y", function(ref, i) {
+                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+            })
+            .text(pluck("id"));
+
+        var newRefs = refs
+            .enter()
+            .append("g")
+            .attr("class", pluck("type"))
+            .classed("ref", true);
+
+        var tt = newRefs.append("text")
+            .attr("x", function(ref) {
+                return ref.node.x
+            })
+            .attr("y", function(ref) {
+                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+            })
+            .text(pluck("id"));
+
+        tt
+            .forEach(function(refTexts) {
+                refTexts.forEach(function(rt) {
+                    var bbox = rt.getBBox();
+                    d3.select(rt.parentNode)
+                        .append("rect")
+                        .attr("x", bbox.x - 1)
+                        .attr("y", bbox.y)
+                        .attr("width", bbox.width + 3)
+                        .attr("height", bbox.height + 3)
+                })
+            });
+
+        refs.exit().remove();
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")

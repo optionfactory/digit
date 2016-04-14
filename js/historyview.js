@@ -386,7 +386,7 @@ define(['d3'], function () {
                 .attr("height", view.commitRadius)
                 .call(setRefPosition)
             
-            newRefs
+            var texts = newRefs
                 .append("svg:text")
                 .attr("width", 3.5*view.commitRadius)
                 .attr("height", view.commitRadius)
