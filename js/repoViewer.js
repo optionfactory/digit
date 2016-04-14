@@ -136,7 +136,7 @@ RepoViewer.prototype = {
             .duration(500)
             .attr("x", pluck("x"))
             .attr("y", function(node) {
-                return node.y - 1.5 * me.commitRadius
+                return node.y - 2.5 * me.commitRadius
             });
 
         var newCommits = commits
@@ -282,6 +282,7 @@ RepoViewer.prototype = {
         tt
             .forEach(function(refTexts) {
                 refTexts.forEach(function(rt) {
+                    if(!rt){return;}
                     var bbox = rt.getBBox();
                     d3.select(rt.parentNode)
                         .append("rect")
