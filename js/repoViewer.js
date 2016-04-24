@@ -87,13 +87,13 @@ RepoViewer.prototype = {
             x: 2 * me.commitRadius * me.zoomBehavior.scale(),
             y: me.canvas.height / 2
         };
-        var positionedData = calculateCoordinates(this.currentState.commits, startingPoint, me.canvas.height / 2, {
+        var positionedData = new CoordinatesCalculator({
             alongDirectrixStep: me.spacingX,
             betweenDirectrixesStep: me.spacingY,
-            directrixSelectionStrategy: directrixSelectionStrategies.flipFlop,
-            forwardNodeDistributionStrategy: distributionStrategies.horizontalStartingFrom,
-            backwardsNodeDistributionStrategy: distributionStrategies.horizontalEndingAt
-        });
+            startingPoint: startingPoint,
+            mainDirectrix: me.canvas.height / 2
+        }).positionNodes(this.currentState.commits);
+
         var positionedById = d3.map();
         positionedData.forEach(function(node) {
             var index = 0;
@@ -282,7 +282,8 @@ RepoViewer.prototype = {
         tt
             .forEach(function(refTexts) {
                 refTexts.forEach(function(rt) {
-                    if(!rt){return;}
+                    if (!rt) {
+                        return; }
                     var bbox = rt.getBBox();
                     d3.select(rt.parentNode)
                         .append("rect")
