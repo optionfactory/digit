@@ -148,7 +148,7 @@ RepoViewer.prototype = {
 
         var copyTextContent = function(t) {
             var range = document.createRange();
-            range.selectNode(this);
+            range.selectNodeContents(this);
             window.getSelection().addRange(range);
             try {
                 document.execCommand('copy');
