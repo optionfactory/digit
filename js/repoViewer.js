@@ -4,7 +4,9 @@ function RepoViewer(config) {
         branches: [],
         stash: [],
         tags:  [],
-        head: { branchId: "master" }
+        head: {
+            branchId: "master"
+        }
     }
 
     this.commitRadius = config && config.commitRadius || 20;
@@ -123,6 +125,7 @@ RepoViewer.prototype = {
                 return c.originalNode.unreachable
             })
 
+        //each (new) commit has its own g
         var newCommits = commits
             .enter()
             .append("g")
@@ -143,9 +146,22 @@ RepoViewer.prototype = {
             .transition("inflate")
             .duration(500)
 
+        var copyTextContent = function(t) {
+                var range = document.createRange();
+                range.selectNode(this);
+                window.getSelection().addRange(range);
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.log('Oops, unable to copy');
+                }
+                window.getSelection().empty();
+            };
+
         newCommits
             .append("text")
             .attr("class", "commitId")
+            .on("dblclick", copyTextContent)
             .text(function(node) {
                 return node.id.substr(0, 6)
             })
@@ -153,12 +169,11 @@ RepoViewer.prototype = {
             .text(function(node) {
                 return node.id;
             })
-            .transition("inflate")
-            .duration(500)
 
         newCommits
             .append("text")
             .attr("class", "commitMessage")
+            .on("dblclick", copyTextContent)
             .text(function(node) {
                 return node.originalNode.message.length > 12 ?
                     node.originalNode.message.substr(0, 12) + "..." : node.originalNode.message;
@@ -202,7 +217,10 @@ RepoViewer.prototype = {
             commits.selectAll('path.link')
             .data(function(node) {
                 return node.originalNode.parents.map(function(parentId) {
-                    return { source: node, target: positionedById.get(parentId) };
+                    return {
+                        source: node,
+                        target: positionedById.get(parentId)
+                    };
                 });
             });
 
@@ -252,37 +270,44 @@ RepoViewer.prototype = {
             .attr("class", pluck("type"))
             .classed("ref", true);
 
-        refs
-            .select("text")
-            .attr("class", "refText")
-            .attr("x", function(ref) {
-                return ref.node.x
-            })
-            .attr("y", function(ref, i) {
-                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
-            })
-            .text(pluck("id"));
-
         var newRefs = refs
             .enter()
             .append("g")
             .attr("class", pluck("type"))
             .classed("ref", true);
 
-        var tt = newRefs.append("text")
+        newRefs.append("text")
+            .attr("class", "refText")
+            .text(pluck("id"));
+
+
+        newRefs.append("rect");
+        
+        refs
+            .select("text")
             .attr("x", function(ref) {
                 return ref.node.x
             })
             .attr("y", function(ref) {
                 return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
-            })
-            .text(pluck("id"));
+            });
 
-        tt
+
+        refs
+            .select("text.refText")
+            .attr("x", function(ref) {
+                return ref.node.x
+            })
+            .attr("y", function(ref, i) {
+                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+            })
+
+/*        tt
             .forEach(function(refTexts) {
                 refTexts.forEach(function(rt) {
                     if (!rt) {
-                        return; }
+                        return;
+                    }
                     var bbox = rt.getBBox();
                     d3.select(rt.parentNode)
                         .append("rect")
@@ -292,7 +317,7 @@ RepoViewer.prototype = {
                         .attr("height", bbox.height + 3)
                 })
             });
-
+*/
         refs.exit().remove();
 
         //line ending (arrow symbol)
