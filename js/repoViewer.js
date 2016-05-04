@@ -147,16 +147,16 @@ RepoViewer.prototype = {
             .duration(500)
 
         var copyTextContent = function(t) {
-                var range = document.createRange();
-                range.selectNode(this);
-                window.getSelection().addRange(range);
-                try {
-                    document.execCommand('copy');
-                } catch (err) {
-                    console.log('Oops, unable to copy');
-                }
-                window.getSelection().empty();
-            };
+            var range = document.createRange();
+            range.selectNode(this);
+            window.getSelection().addRange(range);
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.log('Oops, unable to copy');
+            }
+            window.getSelection().empty();
+        };
 
         newCommits
             .append("text")
@@ -278,11 +278,12 @@ RepoViewer.prototype = {
 
         newRefs.append("text")
             .attr("class", "refText")
-            .text(pluck("id"));
+            .text(pluck("id"))
+            .on("dblclick", copyTextContent)
 
 
         newRefs.append("rect");
-        
+
         refs
             .select("text")
             .attr("x", function(ref) {
@@ -292,32 +293,18 @@ RepoViewer.prototype = {
                 return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
             });
 
-
         refs
-            .select("text.refText")
-            .attr("x", function(ref) {
-                return ref.node.x
-            })
-            .attr("y", function(ref, i) {
-                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+            .selectAll("text")
+            .forEach(function(refTexts) {
+                var bbox = refTexts[0].getBBox();
+                d3.select(refTexts[0].parentNode)
+                    .select("rect")
+                    .attr("x", bbox.x - 1)
+                    .attr("y", bbox.y)
+                    .attr("width", bbox.width + 3)
+                    .attr("height", bbox.height + 3)
             })
 
-/*        tt
-            .forEach(function(refTexts) {
-                refTexts.forEach(function(rt) {
-                    if (!rt) {
-                        return;
-                    }
-                    var bbox = rt.getBBox();
-                    d3.select(rt.parentNode)
-                        .append("rect")
-                        .attr("x", bbox.x - 1)
-                        .attr("y", bbox.y)
-                        .attr("width", bbox.width + 3)
-                        .attr("height", bbox.height + 3)
-                })
-            });
-*/
         refs.exit().remove();
 
         //line ending (arrow symbol)
