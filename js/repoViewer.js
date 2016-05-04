@@ -189,7 +189,7 @@ RepoViewer.prototype = {
             .transition()
             .duration(500)
             .attr("cx", pluck("x"))
-            .attr("cy", pluck("y"));
+            .attr("cy", pluck("y"))
 
         commits
             .select("text.commitId")
@@ -341,6 +341,9 @@ RepoViewer.prototype = {
                 }
                 return 0;
             })
+            .transition()
+            .duration(500)
+
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")
