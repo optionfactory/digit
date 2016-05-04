@@ -139,6 +139,15 @@ RepoViewer.prototype = {
                 return node.y - 2.5 * me.commitRadius
             });
 
+        commits
+            .select("text.commitMessage")
+            .transition()
+            .duration(500)
+            .attr("x", pluck("x"))
+            .attr("y", function(node) {
+                return node.y - .5 * me.commitRadius
+            });
+
         var newCommits = commits
             .enter()
             .append("g")
