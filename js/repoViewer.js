@@ -138,8 +138,8 @@ RepoViewer.prototype = {
             .attr("class", "commit")
             .on("dblclick.zoom", function(d) {
                 d3.event.stopPropagation(); // possibly redundant, as we removed it from the main svg
-                var dcx = (me.canvas.width / 2 - d.x * me.zoomBehavior.scale());
-                var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
+                var dcx = (me.canvas.width / 2 - d.cx * me.zoomBehavior.scale());
+                var dcy = (me.canvas.height / 2 - d.cy * me.zoomBehavior.scale());
                 me.zoomableCanvas.transition().attr("transform", "translate(" + [dcx, dcy] + ")scale(" + me.zoomBehavior.scale() + ")");
             })
             .attr("r", this.commitRadius)
@@ -153,7 +153,7 @@ RepoViewer.prototype = {
             try {
                 document.execCommand('copy');
             } catch (err) {
-                console.log('Oops, unable to copy');
+                console.log('copy fail.');
             }
             window.getSelection().empty();
         };
@@ -173,7 +173,6 @@ RepoViewer.prototype = {
         newCommits
             .append("text")
             .attr("class", "commitMessage")
-            .on("dblclick", copyTextContent)
             .text(function(node) {
                 return node.originalNode.message.length > 12 ?
                     node.originalNode.message.substr(0, 12) + "..." : node.originalNode.message;
@@ -209,7 +208,6 @@ RepoViewer.prototype = {
             .attr("y", function(node) {
                 return node.y - 1.5 * me.commitRadius
             })
-
 
         commits.exit().remove();
 
@@ -259,8 +257,10 @@ RepoViewer.prototype = {
 
         links.exit().remove();
 
+
         var refs =
-            commits.selectAll('g.ref')
+            commits
+            .selectAll('g.ref')
             .data(function(node) {
                 return node.refs.map(function(ref) {
                     ref.node = node;
@@ -293,10 +293,13 @@ RepoViewer.prototype = {
                 return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
             });
 
+        var refsBBoxById = d3.map();
+
         refs
             .selectAll("text")
             .forEach(function(refTexts) {
                 var bbox = refTexts[0].getBBox();
+                refsBBoxById.set(refTexts[0].textContent, bbox);
                 d3.select(refTexts[0].parentNode)
                     .select("rect")
                     .attr("x", bbox.x - 1)
@@ -306,6 +309,38 @@ RepoViewer.prototype = {
             })
 
         refs.exit().remove();
+
+        var headG = this
+            .zoomableCanvas
+            .selectAll("g.head")
+            .data([this.currentState.head]);
+
+        headG
+            .enter()
+            .append("g")
+            .classed("head", true)
+            .classed("ref", true)
+            .append("text")
+            .attr("class", "refText")
+            .text("HEAD")
+
+        var head = this.currentState.head;
+        headG
+            .selectAll("text")
+            .attr("x", function(h) {
+                if (head.branchId && refsBBoxById.has(head.branchId)) {
+                    var refbb = refsBBoxById.get(head.branchId);
+                    return refbb.x + refbb.width + 10;
+                }
+                return 0;
+            })
+            .attr("y", function(h) {
+                if (head.branchId && refsBBoxById.has(head.branchId)) {
+                    var refbb = refsBBoxById.get(head.branchId);
+                    return refbb.y + refbb.height - 3;
+                }
+                return 0;
+            })
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")

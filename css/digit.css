@@ -57,3 +57,6 @@ g.ref.tag > rect {
     fill: #7FC9FF;
     stroke: #0026FF;
 }
+g.ref.head > text {
+    text-anchor:start;
+}
