@@ -123,6 +123,53 @@ RepoViewer.prototype = {
                 return c.originalNode.unreachable
             })
 
+        var newCommits = commits
+            .enter()
+            .append("g")
+            .classed("commit", true)
+            .classed('unreachable', function(c) {
+                return c.originalNode.unreachable
+            });
+
+        newCommits.append("circle")
+            .attr("class", "commit")
+            .on("dblclick.zoom", function(d) {
+                d3.event.stopPropagation(); // possibly redundant, as we removed it from the main svg
+                var dcx = (me.canvas.width / 2 - d.x * me.zoomBehavior.scale());
+                var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
+                me.zoomableCanvas.transition().attr("transform", "translate(" + [dcx, dcy] + ")scale(" + me.zoomBehavior.scale() + ")");
+            })
+            .attr("r", this.commitRadius)
+            .transition("inflate")
+            .duration(500)
+
+        newCommits
+            .append("text")
+            .attr("class", "commitId")
+            .text(function(node) {
+                return node.id.substr(0, 6)
+            })
+            .append("title")
+            .text(function(node) {
+                return node.id;
+            })
+            .transition("inflate")
+            .duration(500)
+
+        newCommits
+            .append("text")
+            .attr("class", "commitMessage")
+            .text(function(node) {
+                return node.originalNode.message.length > 12 ?
+                    node.originalNode.message.substr(0, 12) + "..." : node.originalNode.message;
+            })
+            .append("title")
+            .text(function(node) {
+                return node.originalNode.message;
+            })
+            .transition("inflate")
+            .duration(500)
+
         commits
             .select("circle.commit")
             .transition()
@@ -137,7 +184,7 @@ RepoViewer.prototype = {
             .attr("x", pluck("x"))
             .attr("y", function(node) {
                 return node.y - 2.5 * me.commitRadius
-            });
+            })
 
         commits
             .select("text.commitMessage")
@@ -145,66 +192,9 @@ RepoViewer.prototype = {
             .duration(500)
             .attr("x", pluck("x"))
             .attr("y", function(node) {
-                return node.y - .5 * me.commitRadius
-            });
-
-        var newCommits = commits
-            .enter()
-            .append("g")
-            .classed("commit", true)
-            .classed('unreachable', function(c) {
-                return c.originalNode.unreachable
-            });
-
-        newCommits
-            .append("circle")
-            .attr("class", "commit")
-            .attr("r", this.commitRadius)
-            .attr("cx", pluck("x"))
-            .attr("cy", pluck("y"))
-            .on("dblclick.zoom", function(d) {
-                d3.event.stopPropagation(); // possibly redundant, as we removed it from the main svg
-                var dcx = (me.canvas.width / 2 - d.x * me.zoomBehavior.scale());
-                var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
-                me.zoomableCanvas.transition().attr("transform", "translate(" + [dcx, dcy] + ")scale(" + me.zoomBehavior.scale() + ")");
-            })
-            .transition("inflate")
-            .duration(500)
-
-        newCommits
-            .append("text")
-            .attr("class", "commitId")
-            .attr("x", pluck("x"))
-            .attr("y", function(node) {
-                return node.y - 2.5 * me.commitRadius
-            })
-            .text(function(node) {
-                return node.id.substr(0, 6)
-            })
-            .append("title")
-            .text(function(node) {
-                return node.id;
-            })
-            .transition("inflate")
-            .duration(500)
-
-        newCommits
-            .append("text")
-            .attr("class", "commitMessage")
-            .attr("x", pluck("x"))
-            .attr("y", function(node) {
                 return node.y - 1.5 * me.commitRadius
             })
-            .text(function(node) {
-                return node.originalNode.message.length > 12 ?
-                    node.originalNode.message.substr(0, 12) + "..." : node.originalNode.message;
-            })
-            .append("title")
-            .text(function(node) {
-                return node.originalNode.message;
-            })
-            .transition("inflate")
-            .duration(500)
+
 
         commits.exit().remove();
 
