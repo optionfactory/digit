@@ -186,24 +186,27 @@ RepoViewer.prototype = {
 
         commits
             .select("circle.commit")
-            .transition()
-            .duration(500)
             .attr("cx", pluck("x"))
             .attr("cy", pluck("y"))
 
         commits
             .select("text.commitId")
-            .transition()
-            .duration(500)
             .attr("x", pluck("x"))
             .attr("y", function(node) {
                 return node.y - 2.5 * me.commitRadius
             })
 
+        var commitBBoxById = d3.map();
+        commits
+            .selectAll("text.commitId")
+            .forEach(function(commitTexts) {
+                var bbox = commitTexts[0].getBBox();
+                var fullCommitId = commitTexts[0].childNodes[1].textContent;
+                commitBBoxById.set(fullCommitId, bbox);
+            })
+
         commits
             .select("text.commitMessage")
-            .transition()
-            .duration(500)
             .attr("x", pluck("x"))
             .attr("y", function(node) {
                 return node.y - 1.5 * me.commitRadius
@@ -276,13 +279,13 @@ RepoViewer.prototype = {
             .attr("class", pluck("type"))
             .classed("ref", true);
 
+        newRefs.append("rect");
+
         newRefs.append("text")
             .attr("class", "refText")
             .text(pluck("id"))
             .on("dblclick", copyTextContent)
 
-
-        newRefs.append("rect");
 
         refs
             .select("text")
@@ -294,7 +297,6 @@ RepoViewer.prototype = {
             });
 
         var refsBBoxById = d3.map();
-
         refs
             .selectAll("text")
             .forEach(function(refTexts) {
@@ -315,14 +317,18 @@ RepoViewer.prototype = {
             .selectAll("g.head")
             .data([this.currentState.head]);
 
-        headG
+        var newHead = headG
             .enter()
             .append("g")
             .classed("head", true)
             .classed("ref", true)
-            .append("text")
+
+        newHead.append("rect")
+        
+        newHead.append("text")
             .attr("class", "refText")
             .text("HEAD")
+            .on("dblclick", copyTextContent)
 
         var head = this.currentState.head;
         headG
@@ -332,6 +338,10 @@ RepoViewer.prototype = {
                     var refbb = refsBBoxById.get(head.branchId);
                     return refbb.x + refbb.width + 10;
                 }
+                if (head.commitId && commitBBoxById.has(head.commitId)) {
+                    var commitBB = commitBBoxById.get(head.commitId);
+                    return commitBB.x + commitBB.width + 10;
+                }
                 return 0;
             })
             .attr("y", function(h) {
@@ -339,10 +349,24 @@ RepoViewer.prototype = {
                     var refbb = refsBBoxById.get(head.branchId);
                     return refbb.y + refbb.height - 3;
                 }
+                if (head.commitId && commitBBoxById.has(head.commitId)) {
+                    var commitBB = commitBBoxById.get(head.commitId);
+                    return commitBB.y + commitBB.height -3;
+                }
                 return 0;
             })
-            .transition()
-            .duration(500)
+
+        headG
+            .selectAll("text")
+            .forEach(function(refTexts) {
+                var bbox = refTexts[0].getBBox();
+                d3.select(refTexts[0].parentNode)
+                    .select("rect")
+                    .attr("x", bbox.x - 1)
+                    .attr("y", bbox.y)
+                    .attr("width", bbox.width + 3)
+                    .attr("height", bbox.height + 3)
+            })
 
 
         //line ending (arrow symbol)

@@ -60,3 +60,8 @@ g.ref.tag > rect {
 g.ref.head > text {
     text-anchor:start;
 }
+g.ref.head > rect {
+    fill: #CCFFCC;
+    stroke: #339900;
+    stroke-width: 2;
+}
