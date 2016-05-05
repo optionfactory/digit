@@ -24,11 +24,12 @@ g.commit.unreachable > circle {
 }
 g.commit.unreachable > path {
     stroke-dasharray: 5 5;
-    stroke: #DDDDDD;
+    stroke: #AAAAAA;
 }
 
 circle.commit {
     fill: #CCFFCC !important;
+    stroke-width: 2;
     stroke: #339900;
 }
 .link {
