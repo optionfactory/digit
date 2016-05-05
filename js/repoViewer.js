@@ -38,7 +38,6 @@ RepoViewer.prototype = {
                 // We only want to transition on wheel event, without interfering with mouse drag panning
                 var isWheel = d3.event.sourceEvent && d3.event.sourceEvent.type === "wheel";
                 var toTransform = isWheel ? me.zoomableCanvas.transition() : me.zoomableCanvas;
-
                 toTransform.attr("transform", t.toString());
             });
         //main svg
@@ -138,9 +137,11 @@ RepoViewer.prototype = {
             .attr("class", "commit")
             .on("dblclick.zoom", function(d) {
                 d3.event.stopPropagation(); // possibly redundant, as we removed it from the main svg
-                var dcx = (me.canvas.width / 2 - d.cx * me.zoomBehavior.scale());
-                var dcy = (me.canvas.height / 2 - d.cy * me.zoomBehavior.scale());
-                me.zoomableCanvas.transition().attr("transform", "translate(" + [dcx, dcy] + ")scale(" + me.zoomBehavior.scale() + ")");
+                //me.zoomBehavior.scale(1);
+                var dcx = (me.canvas.width / 2 - d.x * me.zoomBehavior.scale());
+                var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
+                me.zoomBehavior.translate([dcx, dcy]);
+                me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
             })
             .attr("r", this.commitRadius)
             .transition("inflate")
@@ -324,7 +325,7 @@ RepoViewer.prototype = {
             .classed("ref", true)
 
         newHead.append("rect")
-        
+
         newHead.append("text")
             .attr("class", "refText")
             .text("HEAD")
