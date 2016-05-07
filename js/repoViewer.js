@@ -84,6 +84,8 @@ RepoViewer.prototype = {
         var me = this;
         var color = d3.scale.category20();
 
+        var tooltip = d3.select("div.tooltip");
+
         var startingPoint = {
             x: 2 * me.commitRadius * me.zoomBehavior.scale(),
             y: me.canvas.height / 2
@@ -142,6 +144,27 @@ RepoViewer.prototype = {
                 var dcy = (me.canvas.height / 2 - d.y * me.zoomBehavior.scale());
                 me.zoomBehavior.translate([dcx, dcy]);
                 me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
+            })
+            .on("mouseover", function(commit) {
+                var cm = commit.originalNode
+                d3.select("#tooltip_commit_id").text(cm.id)
+                d3.select("#tooltip_author_name").text(cm.author_name)
+                d3.select("#tooltip_author_email").text(cm.author_email)
+                d3.select("#tooltip_author_date").text(cm.author_date)
+                d3.select("#tooltip_committer_name").text(cm.committer_name)
+                d3.select("#tooltip_committer_email").text(cm.committer_email)
+                d3.select("#tooltip_committer_date").text(cm.committer_date)
+                d3.select("#tooltip_message").text(cm.message)
+
+                tooltip.style("opacity", "1");
+            })
+            .on("mousemove", function(commit) {
+                tooltip
+                    .style("left", Math.max(0, d3.event.pageX - 150) + "px")
+                    .style("top", (d3.event.pageY + 20) + "px");
+            })
+            .on("mouseout", function() {
+                return tooltip.style("opacity", "0");
             })
             .attr("r", this.commitRadius)
             .transition("inflate")
@@ -352,7 +375,7 @@ RepoViewer.prototype = {
                 }
                 if (head.commitId && commitBBoxById.has(head.commitId)) {
                     var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.y + commitBB.height -3;
+                    return commitBB.y + commitBB.height - 3;
                 }
                 return 0;
             })
@@ -368,7 +391,6 @@ RepoViewer.prototype = {
                     .attr("width", bbox.width + 3)
                     .attr("height", bbox.height + 3)
             })
-
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")

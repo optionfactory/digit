@@ -66,3 +66,15 @@ g.ref.head > rect {
     stroke: #339900;
     stroke-width: 2;
 }
+
+
+.tooltip {
+    pointer-events:none; /*let mouse events pass through*/
+    opacity:0;
+    transition: opacity 0.3s;
+    text-shadow:1px 1px 0px gray;
+    background: lightblue;
+    border:solid gray;
+    position: absolute;
+    text-align:center;
+}
