@@ -8,6 +8,7 @@ function RepoViewer(config) {
             branchId: "master"
         }
     }
+    this.coordsById = d3.map();
 
     this.commitRadius = config && config.commitRadius || 20;
     this.spacingX = config && config.spacingX || 100 * 1.5;
@@ -66,6 +67,15 @@ RepoViewer.prototype = {
                 me.zoomBehavior.translate([0, 0]);
                 me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
             });
+        containerDiv.append("button")
+            .attr("class", "gotoHead")
+            .on("click", function() {
+                var headCoords = me.coordsById.get("HEAD");
+                var dcx = (me.canvas.width / 2 - headCoords.x * me.zoomBehavior.scale());
+                var dcy = (me.canvas.height / 2 - headCoords.y * me.zoomBehavior.scale());
+                me.zoomBehavior.translate([dcx, dcy]);
+                me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
+            });
         //the main svg:g element, used to zoom/pan
         this.zoomableCanvas = svg.append("g")
             .attr("x", 0)
@@ -97,6 +107,7 @@ RepoViewer.prototype = {
             mainDirectrix: me.canvas.height / 2
         }).positionNodes(this.currentState.commits);
 
+        this.coordsById = d3.map();
         var positionedById = d3.map();
         positionedData.forEach(function(node) {
             var index = 0;
@@ -117,6 +128,7 @@ RepoViewer.prototype = {
                     return ref;
                 }));
             positionedById.set(node.id, node);
+            me.coordsById.set(node.id, { x: node.x, y: node.y });
         });
 
         var commits = this.commitsG
@@ -249,26 +261,13 @@ RepoViewer.prototype = {
                 });
             });
 
-        links.attr("class", "link")
-            .attr("marker-end", "url(#arrow)")
-            .attr("d", function(d) {
-                var path = "";
-                // move to starting node's center
-                path += "M " + (d.source.x - me.commitRadius) + " " + d.source.y + " ";
-                // cubic Bezier curve control points. 
-                var controlPointOffset = Math.abs(d.source.x - d.target.x) / 2;
-                path += "C " + (d.source.x - controlPointOffset) + " " + d.source.y + " ";
-                path += ", " + (d.target.x + controlPointOffset) + " " + d.target.y + " ";
-                // final destination (just right of the destination node)
-                path += ", " + (d.target.x + me.commitRadius) + " " + d.target.y + " ";
-                return path;
-            });
-
         links
             .enter()
             .append("path")
             .attr("class", "link")
             .attr("marker-end", "url(#arrow)")
+
+        links
             .attr("d", function(d) {
                 var path = "";
                 // move to starting node's center
@@ -310,14 +309,15 @@ RepoViewer.prototype = {
             .text(pluck("id"))
             .on("dblclick", copyTextContent)
 
-
         refs
             .select("text")
             .attr("x", function(ref) {
-                return ref.node.x
+                return ref.node.x;
             })
             .attr("y", function(ref) {
-                return ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position
+                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius * ref.position;
+                me.coordsById.set(ref.id, { x: ref.node.x, y: refY });
+                return refY;
             });
 
         var refsBBoxById = d3.map();
@@ -359,10 +359,12 @@ RepoViewer.prototype = {
             .selectAll("text")
             .attr("x", function(h) {
                 if (head.branchId && refsBBoxById.has(head.branchId)) {
+                    me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
                     var refbb = refsBBoxById.get(head.branchId);
                     return refbb.x + refbb.width + 10;
                 }
                 if (head.commitId && commitBBoxById.has(head.commitId)) {
+                    me.coordsById.set("HEAD", me.coordsById.get(head.commitId));
                     var commitBB = commitBBoxById.get(head.commitId);
                     return commitBB.x + commitBB.width + 10;
                 }

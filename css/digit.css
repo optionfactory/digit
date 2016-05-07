@@ -5,12 +5,25 @@ div .svg-container {
 #local {
     height: 400px;
 }
+.gotoHead {
+    position: absolute;
+    background: url(../img/Headshot.png);
+    width: 35px;
+    height: 35px;
+    top: 5px;
+    right: 50px;
+    background-color: Transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
 
 .reset {
     position: absolute;
-    background: url(../graph-alghoritm/demo/reset.png);
-    width: 20px;
-    height: 20px;
+    background: url(../img/reset_button_icon.png);
+    width: 35px;
+    height: 35px;
     top: 5px;
     right: 5px;
     background-color: Transparent;
