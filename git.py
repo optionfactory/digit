@@ -66,8 +66,8 @@ class MyEventHandler(FileSystemEventHandler):
         self.path = path
 
     def on_any_event(self, event):
-        GET_REACHABLES="git -C {0} log --pretty='%H %P|%s' --reverse --all"
-        GET_UNREACHABLES="git -C {0} rev-list --no-walk --pretty='%H %P|%s' $(git -C {0} fsck --unreachable --no-reflogs --no-progress | awk '{{print $3}}') 2>/dev/null| grep -v '^commit'"
+        GET_REACHABLES="git -C {0} log --pretty='%H %P|%an|%ae|%ad|%cn|%ce|%cd|%s' --reverse --all"
+        GET_UNREACHABLES="git -C {0} rev-list --no-walk --pretty='%H %P|%an|%ae|%ad|%cn|%ce|%cd|%s' $(git -C {0} fsck --unreachable --no-reflogs --no-progress | awk '{{print $3}}') 2>/dev/null| grep -v '^commit'"
         GET_TAGS="git -C {0} show-ref --tags -d"
         GET_BRANCHES="git -C {0} show-ref --heads"
         GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
@@ -85,10 +85,10 @@ class MyEventHandler(FileSystemEventHandler):
             for line in output.split("\n"):
                 if not len(line):
                     continue
-                ids, message = line.split("|", 1)
+                ids, author_name, author_email, author_date, committer_name, committer_email, committer_date, message = line.split("|", 7)
                 hashes = ids.split(" ")
                 hash, parents = hashes[0], [p for p in hashes[1:] if len(p) > 0]
-                history["commits"].append({"id": hash, "unreachable": unreachable, "parents": parents, "message": message}) 
+                history["commits"].append({"id": hash, "unreachable": unreachable, "parents": parents, "author_name":author_name, "author_email":author_email, "author_date":author_date, "committer_name":committer_name, "committer_email":committer_email, "committer_date":committer_date,"message": message}) 
 
         readCommits(GET_REACHABLES.format(self.path))
         readCommits(GET_UNREACHABLES.format(self.path), True)
