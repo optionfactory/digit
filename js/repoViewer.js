@@ -328,10 +328,10 @@ RepoViewer.prototype = {
                 refsBBoxById.set(refTexts[0].textContent, bbox);
                 d3.select(refTexts[0].parentNode)
                     .select("rect")
-                    .attr("x", bbox.x - 1)
-                    .attr("y", bbox.y)
-                    .attr("width", bbox.width + 3)
-                    .attr("height", bbox.height + 3)
+                    .attr("x", bbox.x - 2)
+                    .attr("y", bbox.y -2)
+                    .attr("width", bbox.width + 4)
+                    .attr("height", bbox.height + 4)
             })
 
         refs.exit().remove();
@@ -356,7 +356,7 @@ RepoViewer.prototype = {
 
         var head = this.currentState.head;
         headG
-            .selectAll("text")
+            .select("text")
             .attr("x", function(h) {
                 if (head.branchId && refsBBoxById.has(head.branchId)) {
                     me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
@@ -373,26 +373,22 @@ RepoViewer.prototype = {
             .attr("y", function(h) {
                 if (head.branchId && refsBBoxById.has(head.branchId)) {
                     var refbb = refsBBoxById.get(head.branchId);
-                    return refbb.y + refbb.height - 3;
+                    return refbb.y + refbb.height - 2;
                 }
                 if (head.commitId && commitBBoxById.has(head.commitId)) {
                     var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.y + commitBB.height - 3;
+                    return commitBB.y + commitBB.height - 2;
                 }
                 return 0;
             })
 
+        var headText = headG.select("text");
         headG
-            .selectAll("text")
-            .forEach(function(refTexts) {
-                var bbox = refTexts[0].getBBox();
-                d3.select(refTexts[0].parentNode)
-                    .select("rect")
-                    .attr("x", bbox.x - 1)
-                    .attr("y", bbox.y)
-                    .attr("width", bbox.width + 3)
-                    .attr("height", bbox.height + 3)
-            })
+            .select("rect")
+                    .attr("x", headText.node().getBBox().x - 2)
+                    .attr("y", headText.node().getBBox().y-2)
+                    .attr("width", headText.node().getBBox().width + 4)
+                    .attr("height", headText.node().getBBox().height + 4)
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")
