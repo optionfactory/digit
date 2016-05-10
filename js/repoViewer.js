@@ -316,7 +316,7 @@ RepoViewer.prototype = {
                 return ref.node.x;
             })
             .attr("y", function(ref) {
-                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius *1.25* ref.position;
+                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius *1.4* ref.position;
                 me.coordsById.set(ref.id, { x: ref.node.x, y: refY });
                 return refY;
             });
