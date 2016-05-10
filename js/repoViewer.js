@@ -374,11 +374,11 @@ RepoViewer.prototype = {
             .attr("y", function(h) {
                 if (head.branchId && refsBBoxById.has(head.branchId)) {
                     var refbb = refsBBoxById.get(head.branchId);
-                    return refbb.y + refbb.height - 2;
+                    return refbb.y + refbb.height - 4;
                 }
                 if (head.commitId && commitBBoxById.has(head.commitId)) {
                     var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.y + commitBB.height - 2;
+                    return commitBB.y + commitBB.height - 4;
                 }
                 return 0;
             })
