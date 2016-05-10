@@ -44,8 +44,9 @@ RepoViewer.prototype = {
         //main svg
         var svg = containerDiv
             .append("svg")
-            .attr("width", me.canvas.width)
-            .attr("height", me.canvas.height)
+            .attr("viewBox", function(){return "0 0 "+me.canvas.width+" "+me.canvas.height})
+//            .attr("width", me.canvas.width)
+  //          .attr("height", me.canvas.height)
             .append("g")
             .call(me.zoomBehavior)
             .on("dblclick.zoom", null)

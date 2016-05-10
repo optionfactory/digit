@@ -1,10 +1,23 @@
 div .svg-container {
-    margin: 5px;
+    width: 100%;
+    height: 0;
     position: relative;
 }
+
 #local {
-    height: 400px;
+    height: 800px;
 }
+
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+text {
+    font-size: 20px
+}
+
 .gotoHead {
     position: absolute;
     background: url(../img/Headshot.png);
@@ -32,9 +45,11 @@ div .svg-container {
     overflow: hidden;
     outline: none;
 }
+
 g.commit.unreachable > circle {
     stroke-dasharray: 5 5;
 }
+
 g.commit.unreachable > path {
     stroke-dasharray: 5 5;
     stroke: #AAAAAA;
@@ -45,6 +60,7 @@ circle.commit {
     stroke-width: 2;
     stroke: #339900;
 }
+
 .link {
     stroke: #999;
     stroke-opacity: 1.2;
@@ -52,41 +68,49 @@ circle.commit {
 }
 
 text.commitId {
-    text-anchor:middle;
+    text-anchor: middle;
 }
+
 text.commitMessage {
-    text-anchor:middle;
+    text-anchor: middle;
 }
+
 g.ref > text {
-    text-anchor:middle;
+    text-anchor: middle;
 }
+
 g.ref > rect {
-    fill-opacity:.3;
+    fill-opacity: .3;
 }
+
 g.ref.branch > rect {
     fill: #FFCC66;
     stroke: #CC9900;
 }
+
 g.ref.tag > rect {
     fill: #7FC9FF;
     stroke: #0026FF;
 }
+
 g.ref.head > text {
-    text-anchor:start;
+    text-anchor: start;
 }
+
 g.ref.head > rect {
     fill: #CCFFCC;
     stroke: #339900;
     stroke-width: 2;
 }
 
-
 .tooltip {
-    pointer-events:none; /*let mouse events pass through*/
-    opacity:0;
+    pointer-events: none;
+    /*let mouse events pass through*/
+    opacity: 0;
     transition: opacity 0.3s;
     background: lightblue;
-    border:solid gray;
+    border: solid gray;
     position: absolute;
-    text-align:left;
+    text-align: left;
+    font-size: 25px
 }
