@@ -16,31 +16,34 @@ import webbrowser
 repos = {}
 
 class Repo:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, name):
+        self.name = name
         self.connections = []
         self.data  = {"history": None}
         self.pending = False
-        lastSent = 0
+        self.lastSent = 0
 
-def provideRepo(path):
-    if path not in repos:
-        repos[path] = Repo(path)
+def provideRepo(name):
+    global repos
+    if name not in repos:
+        repos[name] = Repo(name)
+    return repos[name]
 
 class MyServerProtocol(WebSocketServerProtocol):
     def __init__(self):
-        self.path = None
+        self.name = None
 
     def onConnect(self, request):
-        if "path" not in request.params:
-            raise ValueError("Missing parameter: path")
-        path = request.params["path"]
-        print("Client connecting to {}: {}".format(path, request.peer))
-        self.path = path
+        if "name" not in request.params:
+            raise ValueError("Missing parameter: name")
+        name = request.params["name"][0]
+        print("Client connecting to {}: {}".format(name, request.peer))
+        self.name = name
 
     def onOpen(self):
-        provideRepo(path).connections.append(self)
-        self.sendMessage(data["history"], False)
+        repo = provideRepo(self.name)
+        repo.connections.append(self)
+        self.sendMessage(repo.data["history"], False)
         print("WebSocket connection open.")
 
     def onMessage(self, payload, isBinary):
@@ -53,14 +56,17 @@ class MyServerProtocol(WebSocketServerProtocol):
         # self.sendMessage(payload, isBinary)
 
     def onClose(self, wasClean, code, reason):
-        if self.path:
-            repos[self.path].connections.remove(self)
+        global repos
+        if self.name:
+            conns = repos[self.name].connections
+            if self in conns:
+                conns.remove(self)
 
         print("WebSocket connection closed: {}".format(reason))
 
 
-def updateData(path, history):
-    repo = provideRepo(path)
+def updateData(name, history):
+    repo = provideRepo(name)
     repo.data["history"] = history
     repo.pending = True
     sendData(repo)
@@ -78,7 +84,8 @@ def sendData(repo):
         reactor.callLater(1-(now-repo.lastSent), sendData, repo)
 
 class MyEventHandler(FileSystemEventHandler):
-    def __init__(self, path):
+    def __init__(self, name, path):
+        self.name = name
         self.path = path
 
     def on_any_event(self, event):
@@ -140,17 +147,17 @@ class MyEventHandler(FileSystemEventHandler):
             head = subprocess.check_output(GET_HEAD_COMMIT.format(self.path), shell=True).strip().split(" ")[0]
             history["head"] = {"commitId": head}        
         
-        reactor.callFromThread(updateData, self.path, json.dumps(history))
+        reactor.callFromThread(updateData, self.name, json.dumps(history))
 
 class Index(resource.Resource):
     isLeaf = True
-    def __init__(self, paths):
-        self.paths = paths
+    def __init__(self, names):
+        self.names = names
     
     def render_GET(self, request):
         f = open("index.template")
         body = f.read()
-        return body.replace("$$PATHS$$", json.dumps(self.paths))
+        return body.replace("$$PATHS$$", json.dumps(self.names))
 
 if __name__ == '__main__':
 
@@ -160,22 +167,23 @@ if __name__ == '__main__':
     from twisted.internet import reactor
     log.startLogging(sys.stdout)
 
+    target_repos = zip(["local", "remote"], sys.argv[1:])
     from autobahn.twisted.websocket import WebSocketServerFactory
     factory = WebSocketServerFactory()
     factory.protocol = MyServerProtocol
     resource = WebSocketResource(factory)
     root = File(".")
-    root.putChild(u"index.html", Index(sys.argv[1:]))
+    root.putChild(u"index.html", Index([repo[0] for repo in target_repos]))
     root.putChild(u"ws", resource)
     site = Site(root)
     reactor.listenTCP(9000, site)
 
 
-    for path in sys.argv[1:]:
-        event_handler = MyEventHandler(path)
+    for repo in target_repos:
+        event_handler = MyEventHandler(repo[0], repo[1])
         event_handler.on_any_event(None)
         observer = Observer()
-        observer.schedule(event_handler, path+"/.git", recursive=True)
+        observer.schedule(event_handler, repo[1]+"/.git", recursive=True)
         observer.start()
     
     reactor.run()
