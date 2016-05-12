@@ -4,8 +4,8 @@ div .svg-container {
     position: relative;
 }
 
-#local {
-    height: 800px;
+.graphContainer {
+    height: 600px;
 }
 
 svg {
@@ -44,6 +44,12 @@ text {
     border: none;
     overflow: hidden;
     outline: none;
+}
+
+rect.background {
+    fill: #EEE;
+    stroke-width: 1px;
+    stroke: black;
 }
 
 g.commit.unreachable > circle {

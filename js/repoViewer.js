@@ -45,8 +45,6 @@ RepoViewer.prototype = {
         var svg = containerDiv
             .append("svg")
             .attr("viewBox", function(){return "0 0 "+me.canvas.width+" "+me.canvas.height})
-//            .attr("width", me.canvas.width)
-  //          .attr("height", me.canvas.height)
             .append("g")
             .call(me.zoomBehavior)
             .on("dblclick.zoom", null)
@@ -57,7 +55,7 @@ RepoViewer.prototype = {
             .attr("y", 0)
             .attr("width", me.canvas.width)
             .attr("height", me.canvas.height)
-            .attr("fill", "#EEE")
+            .classed("background", true)
             .style("pointer-events", "all");
 
         //reset button
