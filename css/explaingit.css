@@ -272,7 +272,7 @@ g.branch > text, g.tag > text, g.stash > text {
 	text-anchor: middle;
 	fill: #000;
 	font-size: 11px;
-	font-family: Arial;
+	font-family: monospace;
 }
 
 g.head > rect {
@@ -286,7 +286,7 @@ g.head > text {
 	text-anchor: middle;
 	fill: #000;
 	font-size: 11px;
-	font-family: Arial;
+	font-family: monospace;
 	font-weight: bold;
 	text-transform: uppercase;
 }
