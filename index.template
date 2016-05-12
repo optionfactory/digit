@@ -8,6 +8,9 @@
 </head>
 
 <body>
+<script type="text/javascript">
+    var paths = $$PATHS$$
+</script>
     <div id="local" class="graphContainer"></div>
     <script src="lib/d3.v3.js"></script>
     <script src="graph-alghoritm/graphPaths.js" charset="utf-8"></script>
@@ -24,6 +27,7 @@
         <tr><td>Committer:</td><td><span id="tooltip_committer_name">Davide Salvador</span> &lt;<span id="tooltip_committer_email">davide@optionfactory.net</span>&gt;</td></tr>
         <tr><td>Committer Date:</td><td><span id="tooltip_committer_date">Thu May 5 10:57:48 2016 +0200</span></td></tr>
         <tr><td>Message:</td><td><span id="tooltip_message">both orphan and normal commits are now more visible</span></td></tr>
+        <tr><td>Parents:</td><td><span id="tooltip_parents">aaa</span></td></tr>
     </table>
 </div>
 </html>

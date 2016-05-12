@@ -6,25 +6,40 @@ import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from twisted.web.server import Site
+from twisted.web import server, resource
 from twisted.web.static import File
 
 import subprocess
 import json
 import time
 import webbrowser
+repos = {}
 
-connections = []
-data = {"history": None}
-pending = False
-lastSent = 0
+class Repo:
+    def __init__(self, path):
+        self.path = path
+        self.connections = []
+        self.data  = {"history": None}
+        self.pending = False
+        lastSent = 0
+
+def provideRepo(path):
+    if path not in repos:
+        repos[path] = Repo(path)
 
 class MyServerProtocol(WebSocketServerProtocol):
+    def __init__(self):
+        self.path = None
 
     def onConnect(self, request):
-        print("Client connecting: {}".format(request.peer))
+        if "path" not in request.params:
+            raise ValueError("Missing parameter: path")
+        path = request.params["path"]
+        print("Client connecting to {}: {}".format(path, request.peer))
+        self.path = path
 
     def onOpen(self):
-        connections.append(self)
+        provideRepo(path).connections.append(self)
         self.sendMessage(data["history"], False)
         print("WebSocket connection open.")
 
@@ -38,28 +53,29 @@ class MyServerProtocol(WebSocketServerProtocol):
         # self.sendMessage(payload, isBinary)
 
     def onClose(self, wasClean, code, reason):
-        connections.remove(self)
+        if self.path:
+            repos[self.path].connections.remove(self)
 
         print("WebSocket connection closed: {}".format(reason))
 
-def updateData(history):
-    global data, pending, lastSent
-    data["history"] = history
-    pending = True
-    sendData()
 
-def sendData():
-    global data, pending, lastSent
+def updateData(path, history):
+    repo = provideRepo(path)
+    repo.data["history"] = history
+    repo.pending = True
+    sendData(repo)
+
+def sendData(repo):
     now = time.time()
-    if (not pending):
+    if (not repo.pending):
         return
-    if (now - lastSent > 1):
-        lastSent = time.time()
-        pending = False
-        for c in connections:
-            c.sendMessage(data["history"], False)
+    if (now - repo.lastSent > 1):
+        repo.lastSent = time.time()
+        repo.pending = False
+        for c in repo.connections:
+            c.sendMessage(repo.data["history"], False)
     else:
-        reactor.callLater(1-(now-lastSent), sendData)
+        reactor.callLater(1-(now-repo.lastSent), sendData, repo)
 
 class MyEventHandler(FileSystemEventHandler):
     def __init__(self, path):
@@ -115,7 +131,7 @@ class MyEventHandler(FileSystemEventHandler):
         readRefs(GET_TAGS.format(self.path), "tags")
         readRefs(GET_BRANCHES.format(self.path), "branches")
         readRefs(GET_REMOTE_BRANCHES.format(self.path), "branches")
-        readRefs(GET_STASH.format(self.path), "stash")
+        readRefs(GET_STASH.format(self.path), "branches")
 
         try:
             head = subprocess.check_output(GET_HEAD_BRANCH.format(self.path), shell=True).strip()
@@ -124,8 +140,17 @@ class MyEventHandler(FileSystemEventHandler):
             head = subprocess.check_output(GET_HEAD_COMMIT.format(self.path), shell=True).strip().split(" ")[0]
             history["head"] = {"commitId": head}        
         
-        reactor.callFromThread(updateData, json.dumps(history))
+        reactor.callFromThread(updateData, self.path, json.dumps(history))
 
+class Index(resource.Resource):
+    isLeaf = True
+    def __init__(self, paths):
+        self.paths = paths
+    
+    def render_GET(self, request):
+        f = open("index.template")
+        body = f.read()
+        return body.replace("$$PATHS$$", json.dumps(self.paths))
 
 if __name__ == '__main__':
 
@@ -140,18 +165,18 @@ if __name__ == '__main__':
     factory.protocol = MyServerProtocol
     resource = WebSocketResource(factory)
     root = File(".")
+    root.putChild(u"index.html", Index(sys.argv[1:]))
     root.putChild(u"ws", resource)
     site = Site(root)
     reactor.listenTCP(9000, site)
 
-    path = sys.argv[1]
-    event_handler = MyEventHandler(path)
-    event_handler.on_any_event(None)
-    observer = Observer()
-    observer.schedule(event_handler, path+"/.git", recursive=True)
-    observer.start()
 
-
+    for path in sys.argv[1:]:
+        event_handler = MyEventHandler(path)
+        event_handler.on_any_event(None)
+        observer = Observer()
+        observer.schedule(event_handler, path+"/.git", recursive=True)
+        observer.start()
     
     reactor.run()
     observer.stop()

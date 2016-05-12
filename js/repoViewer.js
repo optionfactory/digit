@@ -166,6 +166,8 @@ RepoViewer.prototype = {
                 d3.select("#tooltip_committer_email").text(cm.committer_email)
                 d3.select("#tooltip_committer_date").text(cm.committer_date)
                 d3.select("#tooltip_message").text(cm.message)
+                d3.select("#tooltip_parents").text(cm.parents.map(function(p){return p.substr(0, 6)}).toString())
+
 
                 tooltip.style("opacity", "1");
             })
