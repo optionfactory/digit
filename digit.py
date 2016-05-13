@@ -98,7 +98,7 @@ class MyEventHandler(FileSystemEventHandler):
         GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
         GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD 2>/dev/null"
 
-        history = {"commits": [], "tags": [], "stash": [], "branches": [], "head": None}
+        history = {"name": self.name, "path": self.path, "commits": [], "tags": [], "stash": [], "branches": [], "head": None}
 
         def readCommits(cmd, unreachable=False):
             try:
@@ -157,7 +157,7 @@ class Index(resource.Resource):
     def render_GET(self, request):
         f = open("index.template")
         body = f.read()
-        return body.replace("$$PATHS$$", json.dumps(self.names))
+        return body.replace("$$NAMES$$", json.dumps(self.names))
 
 if __name__ == '__main__':
 

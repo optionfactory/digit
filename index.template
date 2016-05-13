@@ -9,10 +9,10 @@
 
 <body>
 <script type="text/javascript">
-    var paths = $$PATHS$$
+    var names = $$NAMES$$
 </script>
     <div id="local" class="graphContainer"></div>
-    <div id="remote" class="graphContainer"></div>
+    <div id="remote" class="graphContainer remote"></div>
     <script src="lib/d3.v3.js"></script>
     <script src="graph-alghoritm/graphPaths.js" charset="utf-8"></script>
     <script src="graph-alghoritm/CoordinatesCalculator.js" charset="utf-8"></script>

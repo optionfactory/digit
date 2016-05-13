@@ -12,6 +12,10 @@ div .svg-container {
     height: 600px;
 }
 
+.graphContainer.remote {
+    height: 300px;
+}
+
 svg {
     position: absolute;
     top: 0;

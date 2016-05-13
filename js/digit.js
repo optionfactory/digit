@@ -1,8 +1,8 @@
-function connect(path) {
-    var socket = new WebSocket("ws://localhost:9000/ws?name=" + path);
+function connect(name) {
+    var socket = new WebSocket("ws://localhost:9000/ws?name=" + name);
     socket.onopen = function() {
         var repoViewer = new RepoViewer();
-        repoViewer.render(d3.select("#"+path));
+        repoViewer.render(d3.select("#"+name));
         socket.onmessage = function(evt) {
             repoViewer.update(JSON.parse(evt.data));
         };
@@ -14,4 +14,4 @@ function connect(path) {
         setTimeout(connect.bind(null, path), 1000);
     }
 };
-paths.forEach(connect);
+names.forEach(connect);
