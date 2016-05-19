@@ -26,10 +26,11 @@ RepoViewer.prototype = {
         }
 
         //create a wrapper div to hold svg and buttons together
+        var me = this;
         var containerDiv = container
             .append("div")
             .attr("class", "svg-container");
-        var me = this;
+        me.containerDiv = containerDiv;
 
         this.zoomBehavior = d3.behavior.zoom()
             .on("zoom", function() {
@@ -44,7 +45,9 @@ RepoViewer.prototype = {
         //main svg
         var svg = containerDiv
             .append("svg")
-            .attr("viewBox", function(){return "0 0 "+me.canvas.width+" "+me.canvas.height})
+            .attr("viewBox", function() {
+                return "0 0 " + me.canvas.width + " " + me.canvas.height
+            })
             .append("g")
             .call(me.zoomBehavior)
             .on("dblclick.zoom", null)
@@ -68,13 +71,7 @@ RepoViewer.prototype = {
             });
         containerDiv.append("button")
             .attr("class", "gotoHead")
-            .on("click", function() {
-                var headCoords = me.coordsById.get("HEAD");
-                var dcx = (me.canvas.width / 2 - headCoords.x * me.zoomBehavior.scale());
-                var dcy = (me.canvas.height / 2 - headCoords.y * me.zoomBehavior.scale());
-                me.zoomBehavior.translate([dcx, dcy]);
-                me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
-            });
+            .on("click", me._positionOnHEAD.bind(me));
         //the main svg:g element, used to zoom/pan
         this.zoomableCanvas = svg.append("g")
             .attr("x", 0)
@@ -83,13 +80,25 @@ RepoViewer.prototype = {
             .attr("height", me.canvas.height);
 
         this.commitsG = this.zoomableCanvas.append("g");
-        this.renderItems();
+        this._renderItems();
     },
-    update: function(history) {
+    update: function(history, isFirstUpdate) {
         this.currentState = history;
-        this.renderItems();
+        this._renderItems();
+        if (isFirstUpdate) {
+            this._positionOnHEAD();
+        }
+
     },
-    renderItems: function() {
+    _positionOnHEAD: function() {
+        var me = this;
+        var headCoords = me.coordsById.get("HEAD");
+        var dcx = (me.canvas.width / 2 - headCoords.x * me.zoomBehavior.scale());
+        var dcy = (me.canvas.height / 2 - headCoords.y * me.zoomBehavior.scale());
+        me.zoomBehavior.translate([dcx, dcy]);
+        me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
+    },
+    _renderItems: function() {
         var me = this;
         var color = d3.scale.category20();
 
@@ -105,6 +114,25 @@ RepoViewer.prototype = {
             startingPoint: startingPoint,
             mainDirectrix: me.canvas.height / 2
         }).positionNodes(this.currentState.commits);
+
+        var repoPathLabel = me.containerDiv
+            .selectAll("#repoPath")
+            .data([me.currentState.path]);
+
+        repoPathLabel
+            .text(function(x) {
+                return x;
+            })
+
+        repoPathLabel
+            .enter()
+            .append("div")
+            .attr("id", "repoPath")
+            .classed("pathLabel", true)
+
+        repoPathLabel
+            .exit()
+            .remove()
 
         this.coordsById = d3.map();
         var positionedById = d3.map();
@@ -166,7 +194,9 @@ RepoViewer.prototype = {
                 d3.select("#tooltip_committer_email").text(cm.committer_email)
                 d3.select("#tooltip_committer_date").text(cm.committer_date)
                 d3.select("#tooltip_message").text(cm.message)
-                d3.select("#tooltip_parents").text(cm.parents.map(function(p){return p.substr(0,6);}).toString());
+                d3.select("#tooltip_parents").text(cm.parents.map(function(p) {
+                    return p.substr(0, 6)
+                }).toString())
 
                 tooltip.style("opacity", "1");
             })
@@ -293,8 +323,6 @@ RepoViewer.prototype = {
                     return ref;
                 });
             }, pluck("id"))
-            .attr("class", pluck("type"))
-            .classed("ref", true);
 
         var newRefs = refs
             .enter()
@@ -315,7 +343,7 @@ RepoViewer.prototype = {
                 return ref.node.x;
             })
             .attr("y", function(ref) {
-                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius *1.4* ref.position;
+                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius * 1.4 * ref.position;
                 me.coordsById.set(ref.id, { x: ref.node.x, y: refY });
                 return refY;
             });
@@ -329,7 +357,7 @@ RepoViewer.prototype = {
                 d3.select(refTexts[0].parentNode)
                     .select("rect")
                     .attr("x", bbox.x - 2)
-                    .attr("y", bbox.y -2)
+                    .attr("y", bbox.y - 2)
                     .attr("width", bbox.width + 4)
                     .attr("height", bbox.height + 4)
             })
@@ -340,6 +368,39 @@ RepoViewer.prototype = {
             .zoomableCanvas
             .selectAll("g.head")
             .data([this.currentState.head]);
+
+        var head = this.currentState.head;
+
+        headG
+            .transition()
+            .attr("transform", function() {
+                var headX = function(h) {
+                    if (head.branchId && refsBBoxById.has(head.branchId)) {
+                        me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
+                        var refbb = refsBBoxById.get(head.branchId);
+                        return refbb.x + refbb.width + 10;
+                    }
+                    if (head.commitId && commitBBoxById.has(head.commitId)) {
+                        me.coordsById.set("HEAD", me.coordsById.get(head.commitId));
+                        var commitBB = commitBBoxById.get(head.commitId);
+                        return commitBB.x + commitBB.width + 10;
+                    }
+                    return 0;
+                }();
+
+                var headY = function(h) {
+                    if (head.branchId && refsBBoxById.has(head.branchId)) {
+                        var refbb = refsBBoxById.get(head.branchId);
+                        return refbb.y + refbb.height - 4;
+                    }
+                    if (head.commitId && commitBBoxById.has(head.commitId)) {
+                        var commitBB = commitBBoxById.get(head.commitId);
+                        return commitBB.y + commitBB.height - 4;
+                    }
+                    return 0;
+                }();
+                return "translate(" + headX + " " + headY + ")";
+            })
 
         var newHead = headG
             .enter()
@@ -354,41 +415,13 @@ RepoViewer.prototype = {
             .text("HEAD")
             .on("dblclick", copyTextContent)
 
-        var head = this.currentState.head;
-        headG
-            .select("text")
-            .attr("x", function(h) {
-                if (head.branchId && refsBBoxById.has(head.branchId)) {
-                    me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
-                    var refbb = refsBBoxById.get(head.branchId);
-                    return refbb.x + refbb.width + 10;
-                }
-                if (head.commitId && commitBBoxById.has(head.commitId)) {
-                    me.coordsById.set("HEAD", me.coordsById.get(head.commitId));
-                    var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.x + commitBB.width + 10;
-                }
-                return 0;
-            })
-            .attr("y", function(h) {
-                if (head.branchId && refsBBoxById.has(head.branchId)) {
-                    var refbb = refsBBoxById.get(head.branchId);
-                    return refbb.y + refbb.height - 4;
-                }
-                if (head.commitId && commitBBoxById.has(head.commitId)) {
-                    var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.y + commitBB.height - 4;
-                }
-                return 0;
-            })
-
         var headText = headG.select("text");
         headG
             .select("rect")
-                    .attr("x", headText.node().getBBox().x - 2)
-                    .attr("y", headText.node().getBBox().y-2)
-                    .attr("width", headText.node().getBBox().width + 4)
-                    .attr("height", headText.node().getBBox().height + 4)
+            .attr("x", headText.node().getBBox().x - 2)
+            .attr("y", headText.node().getBBox().y - 2)
+            .attr("width", headText.node().getBBox().width + 4)
+            .attr("height", headText.node().getBBox().height + 4)
 
         //line ending (arrow symbol)
         this.zoomableCanvas.append("defs").selectAll("marker")

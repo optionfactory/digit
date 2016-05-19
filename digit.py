@@ -6,26 +6,45 @@ import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from twisted.web.server import Site
+from twisted.web import server, resource
 from twisted.web.static import File
 
 import subprocess
 import json
 import time
 import webbrowser
+import os
+repos = {}
 
-connections = []
-data = {"history": None}
-pending = False
-lastSent = 0
+class Repo:
+    def __init__(self, name):
+        self.name = name
+        self.connections = []
+        self.data  = {"history": None}
+        self.pending = False
+        self.lastSent = 0
+
+def provideRepo(name):
+    global repos
+    if name not in repos:
+        repos[name] = Repo(name)
+    return repos[name]
 
 class MyServerProtocol(WebSocketServerProtocol):
+    def __init__(self):
+        self.name = None
 
     def onConnect(self, request):
-        print("Client connecting: {}".format(request.peer))
+        if "name" not in request.params:
+            raise ValueError("Missing parameter: name")
+        name = request.params["name"][0]
+        print("Client connecting to {}: {}".format(name, request.peer))
+        self.name = name
 
     def onOpen(self):
-        connections.append(self)
-        self.sendMessage(data["history"], False)
+        repo = provideRepo(self.name)
+        repo.connections.append(self)
+        self.sendMessage(repo.data["history"], False)
         print("WebSocket connection open.")
 
     def onMessage(self, payload, isBinary):
@@ -38,31 +57,36 @@ class MyServerProtocol(WebSocketServerProtocol):
         # self.sendMessage(payload, isBinary)
 
     def onClose(self, wasClean, code, reason):
-        connections.remove(self)
+        global repos
+        if self.name:
+            conns = repos[self.name].connections
+            if self in conns:
+                conns.remove(self)
 
         print("WebSocket connection closed: {}".format(reason))
 
-def updateData(history):
-    global data, pending, lastSent
-    data["history"] = history
-    pending = True
-    sendData()
 
-def sendData():
-    global data, pending, lastSent
+def updateData(name, history):
+    repo = provideRepo(name)
+    repo.data["history"] = history
+    repo.pending = True
+    sendData(repo)
+
+def sendData(repo):
     now = time.time()
-    if (not pending):
+    if (not repo.pending):
         return
-    if (now - lastSent > 1):
-        lastSent = time.time()
-        pending = False
-        for c in connections:
-            c.sendMessage(data["history"], False)
+    if (now - repo.lastSent > 1):
+        repo.lastSent = time.time()
+        repo.pending = False
+        for c in repo.connections:
+            c.sendMessage(repo.data["history"], False)
     else:
-        reactor.callLater(1-(now-lastSent), sendData)
+        reactor.callLater(1-(now-repo.lastSent), sendData, repo)
 
 class MyEventHandler(FileSystemEventHandler):
-    def __init__(self, path):
+    def __init__(self, name, path):
+        self.name = name
         self.path = path
 
     def on_any_event(self, event):
@@ -75,7 +99,7 @@ class MyEventHandler(FileSystemEventHandler):
         GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
         GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD 2>/dev/null"
 
-        history = {"commits": [], "tags": [], "stash": [], "branches": [], "head": None}
+        history = {"name": self.name, "path": os.path.abspath(self.path), "commits": [], "tags": [], "stash": [], "branches": [], "head": None}
 
         def readCommits(cmd, unreachable=False):
             try:
@@ -115,7 +139,7 @@ class MyEventHandler(FileSystemEventHandler):
         readRefs(GET_TAGS.format(self.path), "tags")
         readRefs(GET_BRANCHES.format(self.path), "branches")
         readRefs(GET_REMOTE_BRANCHES.format(self.path), "branches")
-        readRefs(GET_STASH.format(self.path), "stash")
+        readRefs(GET_STASH.format(self.path), "branches")
 
         try:
             head = subprocess.check_output(GET_HEAD_BRANCH.format(self.path), shell=True).strip()
@@ -124,8 +148,17 @@ class MyEventHandler(FileSystemEventHandler):
             head = subprocess.check_output(GET_HEAD_COMMIT.format(self.path), shell=True).strip().split(" ")[0]
             history["head"] = {"commitId": head}        
         
-        reactor.callFromThread(updateData, json.dumps(history))
+        reactor.callFromThread(updateData, self.name, json.dumps(history))
 
+class Index(resource.Resource):
+    isLeaf = True
+    def __init__(self, names):
+        self.names = names
+    
+    def render_GET(self, request):
+        f = open("index.template")
+        body = f.read()
+        return body.replace("$$NAMES$$", json.dumps(self.names))
 
 if __name__ == '__main__':
 
@@ -135,23 +168,24 @@ if __name__ == '__main__':
     from twisted.internet import reactor
     log.startLogging(sys.stdout)
 
+    target_repos = zip(["local", "remote"], sys.argv[1:])
     from autobahn.twisted.websocket import WebSocketServerFactory
     factory = WebSocketServerFactory()
     factory.protocol = MyServerProtocol
     resource = WebSocketResource(factory)
     root = File(".")
+    root.putChild(u"index.html", Index([repo[0] for repo in target_repos]))
     root.putChild(u"ws", resource)
     site = Site(root)
     reactor.listenTCP(9000, site)
 
-    path = sys.argv[1]
-    event_handler = MyEventHandler(path)
-    event_handler.on_any_event(None)
-    observer = Observer()
-    observer.schedule(event_handler, path+"/.git", recursive=True)
-    observer.start()
 
-
+    for repo in target_repos:
+        event_handler = MyEventHandler(repo[0], repo[1])
+        event_handler.on_any_event(None)
+        observer = Observer()
+        observer.schedule(event_handler, repo[1]+"/.git", recursive=True)
+        observer.start()
     
     reactor.run()
     observer.stop()
