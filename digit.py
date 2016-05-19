@@ -13,6 +13,7 @@ import subprocess
 import json
 import time
 import webbrowser
+import os
 repos = {}
 
 class Repo:
@@ -98,7 +99,7 @@ class MyEventHandler(FileSystemEventHandler):
         GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
         GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD 2>/dev/null"
 
-        history = {"name": self.name, "path": self.path, "commits": [], "tags": [], "stash": [], "branches": [], "head": None}
+        history = {"name": self.name, "path": os.path.abspath(self.path), "commits": [], "tags": [], "stash": [], "branches": [], "head": None}
 
         def readCommits(cmd, unreachable=False):
             try:

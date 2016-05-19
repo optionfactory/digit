@@ -26,10 +26,11 @@ RepoViewer.prototype = {
         }
 
         //create a wrapper div to hold svg and buttons together
+        var me = this;
         var containerDiv = container
             .append("div")
             .attr("class", "svg-container");
-        var me = this;
+        me.containerDiv = containerDiv;
 
         this.zoomBehavior = d3.behavior.zoom()
             .on("zoom", function() {
@@ -45,7 +46,8 @@ RepoViewer.prototype = {
         var svg = containerDiv
             .append("svg")
             .attr("viewBox", function() {
-                return "0 0 " + me.canvas.width + " " + me.canvas.height })
+                return "0 0 " + me.canvas.width + " " + me.canvas.height
+            })
             .append("g")
             .call(me.zoomBehavior)
             .on("dblclick.zoom", null)
@@ -83,7 +85,7 @@ RepoViewer.prototype = {
     update: function(history, isFirstUpdate) {
         this.currentState = history;
         this._renderItems();
-        if(isFirstUpdate){
+        if (isFirstUpdate) {
             this._positionOnHEAD();
         }
 
@@ -112,6 +114,25 @@ RepoViewer.prototype = {
             startingPoint: startingPoint,
             mainDirectrix: me.canvas.height / 2
         }).positionNodes(this.currentState.commits);
+
+        var repoPathLabel = me.containerDiv
+            .selectAll("#repoPath")
+            .data([me.currentState.path]);
+
+        repoPathLabel
+            .text(function(x) {
+                return x;
+            })
+            
+        repoPathLabel
+            .enter()
+            .append("div")
+            .attr("id", "repoPath")
+            .classed("pathLabel", true)
+
+        repoPathLabel
+            .exit()
+            .remove()
 
         this.coordsById = d3.map();
         var positionedById = d3.map();
@@ -174,7 +195,8 @@ RepoViewer.prototype = {
                 d3.select("#tooltip_committer_date").text(cm.committer_date)
                 d3.select("#tooltip_message").text(cm.message)
                 d3.select("#tooltip_parents").text(cm.parents.map(function(p) {
-                    return p.substr(0, 6) }).toString())
+                    return p.substr(0, 6)
+                }).toString())
 
 
                 tooltip.style("opacity", "1");

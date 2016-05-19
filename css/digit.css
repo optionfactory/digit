@@ -28,6 +28,12 @@ text {
     letter-spacing: -1.5px;
 }
 
+.pathLabel {
+    position: absolute;
+    top:5px;
+    left: 5px;
+}
+
 .gotoHead {
     position: absolute;
     background: url(../img/Headshot.png);
