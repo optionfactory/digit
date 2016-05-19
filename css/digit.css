@@ -1,0 +1,122 @@
+div .svg-container {
+    width: 100%;
+    height: 0;
+    position: relative;
+}
+
+.graphContainer {
+    height: 600px;
+}
+
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+text {
+    font-size: 20px
+}
+
+.gotoHead {
+    position: absolute;
+    background: url(../img/Headshot.png);
+    width: 35px;
+    height: 35px;
+    top: 5px;
+    right: 50px;
+    background-color: Transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
+
+.reset {
+    position: absolute;
+    background: url(../img/reset_button_icon.png);
+    width: 35px;
+    height: 35px;
+    top: 5px;
+    right: 5px;
+    background-color: Transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
+
+rect.background {
+    fill: #EEE;
+    stroke-width: 1px;
+    stroke: black;
+}
+
+g.commit.unreachable > circle {
+    stroke-dasharray: 5 5;
+}
+
+g.commit.unreachable > path {
+    stroke-dasharray: 5 5;
+    stroke: #AAAAAA;
+}
+
+circle.commit {
+    fill: #CCFFCC !important;
+    stroke-width: 2;
+    stroke: #339900;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 1.2;
+    fill: none;
+}
+
+text.commitId {
+    text-anchor: middle;
+}
+
+text.commitMessage {
+    text-anchor: middle;
+}
+
+g.ref > text {
+    text-anchor: middle;
+}
+
+g.ref > rect {
+    fill-opacity: .3;
+}
+
+g.ref.branch > rect {
+    fill: #FFCC66;
+    stroke: #CC9900;
+}
+
+g.ref.tag > rect {
+    fill: #7FC9FF;
+    stroke: #0026FF;
+}
+
+g.ref.head > text {
+    text-anchor: start;
+}
+
+g.ref.head > rect {
+    fill: #CCFFCC;
+    stroke: #339900;
+    stroke-width: 2;
+}
+
+.tooltip {
+    pointer-events: none;
+    /*let mouse events pass through*/
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: lightblue;
+    border: solid gray;
+    position: absolute;
+    text-align: left;
+    font-size: 25px
+}
