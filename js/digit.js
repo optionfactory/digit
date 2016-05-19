@@ -14,7 +14,7 @@ function connect(name) {
     }
     socket.onclose = function(evt) {
         console.log("ws connection closed with code '" + evt.code + "' and reason '" + evt.reason + "' (clean='" + evt.wasClean + "')");
-        setTimeout(connect.bind(null, path), 1000);
+        setTimeout(connect.bind(null, name), 2000);
     }
 };
 names.forEach(connect);
