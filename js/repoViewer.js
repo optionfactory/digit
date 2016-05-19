@@ -123,7 +123,7 @@ RepoViewer.prototype = {
             .text(function(x) {
                 return x;
             })
-            
+
         repoPathLabel
             .enter()
             .append("div")

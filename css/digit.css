@@ -68,6 +68,10 @@ rect.background {
     stroke: black;
 }
 
+.graphContainer.remote rect.background {
+    fill: #DDD;
+}
+
 g.commit.unreachable > circle {
     stroke-dasharray: 5 5;
 }
@@ -81,6 +85,12 @@ circle.commit {
     fill: #CCFFCC !important;
     stroke-width: 2;
     stroke: #339900;
+}
+
+.graphContainer.remote circle.commit {
+    fill: #FFCCCC !important;
+    stroke-width: 2;
+    stroke: #993300;
 }
 
 .link {
