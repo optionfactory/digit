@@ -324,8 +324,6 @@ RepoViewer.prototype = {
                     return ref;
                 });
             }, pluck("id"))
-            .attr("class", pluck("type"))
-            .classed("ref", true);
 
         var newRefs = refs
             .enter()
@@ -372,6 +370,39 @@ RepoViewer.prototype = {
             .selectAll("g.head")
             .data([this.currentState.head]);
 
+        var head = this.currentState.head;
+
+        headG
+            .transition()
+            .attr("transform", function() {
+                var headX = function(h) {
+                    if (head.branchId && refsBBoxById.has(head.branchId)) {
+                        me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
+                        var refbb = refsBBoxById.get(head.branchId);
+                        return refbb.x + refbb.width + 10;
+                    }
+                    if (head.commitId && commitBBoxById.has(head.commitId)) {
+                        me.coordsById.set("HEAD", me.coordsById.get(head.commitId));
+                        var commitBB = commitBBoxById.get(head.commitId);
+                        return commitBB.x + commitBB.width + 10;
+                    }
+                    return 0;
+                }();
+
+                var headY = function(h) {
+                    if (head.branchId && refsBBoxById.has(head.branchId)) {
+                        var refbb = refsBBoxById.get(head.branchId);
+                        return refbb.y + refbb.height - 4;
+                    }
+                    if (head.commitId && commitBBoxById.has(head.commitId)) {
+                        var commitBB = commitBBoxById.get(head.commitId);
+                        return commitBB.y + commitBB.height - 4;
+                    }
+                    return 0;
+                }();
+                return "translate(" + headX + " " + headY + ")";
+            })
+
         var newHead = headG
             .enter()
             .append("g")
@@ -384,34 +415,6 @@ RepoViewer.prototype = {
             .attr("class", "refText")
             .text("HEAD")
             .on("dblclick", copyTextContent)
-
-        var head = this.currentState.head;
-        headG
-            .select("text")
-            .attr("x", function(h) {
-                if (head.branchId && refsBBoxById.has(head.branchId)) {
-                    me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
-                    var refbb = refsBBoxById.get(head.branchId);
-                    return refbb.x + refbb.width + 10;
-                }
-                if (head.commitId && commitBBoxById.has(head.commitId)) {
-                    me.coordsById.set("HEAD", me.coordsById.get(head.commitId));
-                    var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.x + commitBB.width + 10;
-                }
-                return 0;
-            })
-            .attr("y", function(h) {
-                if (head.branchId && refsBBoxById.has(head.branchId)) {
-                    var refbb = refsBBoxById.get(head.branchId);
-                    return refbb.y + refbb.height - 4;
-                }
-                if (head.commitId && commitBBoxById.has(head.commitId)) {
-                    var commitBB = commitBBoxById.get(head.commitId);
-                    return commitBB.y + commitBB.height - 4;
-                }
-                return 0;
-            })
 
         var headText = headG.select("text");
         headG
