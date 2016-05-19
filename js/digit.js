@@ -3,8 +3,10 @@ function connect(name) {
     socket.onopen = function() {
         var repoViewer = new RepoViewer();
         repoViewer.render(d3.select("#"+name));
+        var firstUpdate = true;
         socket.onmessage = function(evt) {
-            repoViewer.update(JSON.parse(evt.data));
+            repoViewer.update(JSON.parse(evt.data), firstUpdate);
+            firstUpdate=false;
         };
     };
     socket.onerror = function() {
