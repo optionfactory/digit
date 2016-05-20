@@ -187,25 +187,7 @@ RepoViewer.prototype = {
             processRefsAndAttachToNode(me.currentState.tags, "tag");
             processRefsAndAttachToNode(me.currentState.stash, "stash");
 
-/*            me.refs = me.refs.concat(me.currentState.branches
-                .filter(function(ref) {
-                    return ref.commitId === node.id
-                }).map(function(ref) {
-                    ref.type = "branch";
-                    ref.position = index++;
-                    ref.node = node;
-                    return ref;
-                }));
-            me.refs = me.refs.concat(me.currentState.tags
-                .filter(function(ref) {
-                    return ref.commitId === node.id
-                }).map(function(ref) {
-                    ref.type = "tag";
-                    ref.position = index++;
-                    ref.node = node;
-                    return ref;
-                }));
-  */          positionedById.set(node.id, node);
+            positionedById.set(node.id, node);
             me.coordsById.set(node.id, { x: node.x, y: node.y });
         });
 
