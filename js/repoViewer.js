@@ -311,8 +311,14 @@ RepoViewer.prototype = {
                 path += "M " + (d.source.x - me.commitRadius) + " " + d.source.y + " ";
                 // cubic Bezier curve control points. 
                 var controlPointOffset = Math.abs(d.source.x - d.target.x) / 2;
-                path += "C " + (d.source.x - controlPointOffset) + " " + d.source.y + " ";
-                path += ", " + (d.target.x + controlPointOffset) + " " + d.target.y + " ";
+                var nonConsecutiveNodesOnSameDirectix = d.source.y === d.target.y && Math.abs(d.target.x - d.source.x) > me.spacingX;
+                if (nonConsecutiveNodesOnSameDirectix) {
+                    path += "C " + (d.source.x - controlPointOffset / 2) + " " + (d.source.y + controlPointOffset / 2) + " ";
+                    path += ", " + (d.target.x + controlPointOffset / 2) + " " + (d.target.y + controlPointOffset / 2) + " ";
+                } else {
+                    path += "C " + (d.source.x - controlPointOffset) + " " + d.source.y + " ";
+                    path += ", " + (d.target.x + controlPointOffset) + " " + d.target.y + " ";
+                }
                 // final destination (just right of the destination node)
                 path += ", " + (d.target.x + me.commitRadius) + " " + d.target.y + " ";
                 return path;
