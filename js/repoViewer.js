@@ -185,7 +185,7 @@ RepoViewer.prototype = {
             processRefsAndAttachToNode(me.currentState.branches, "branch");
             processRefsAndAttachToNode(me.currentState.remoteBranches, "remoteBranch");
             processRefsAndAttachToNode(me.currentState.tags, "tag");
-            processRefsAndAttachToNode(me.currentState.stash, "branch");
+            processRefsAndAttachToNode(me.currentState.stash, "stash");
 
 /*            me.refs = me.refs.concat(me.currentState.branches
                 .filter(function(ref) {

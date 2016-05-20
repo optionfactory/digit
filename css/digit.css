@@ -1,3 +1,18 @@
+:root{
+    --local-commit:#99FFFF;
+    --local-commit-border:#3399FF;
+    --local-ref:#FFFF33;
+    --local-ref-border:#FFCC33;
+    --remote-commit:#FFCCCC;
+    --remote-commit-border:#993300;
+    --head:#CCFFCC;
+    --head-border:#339900;
+    --tag:#FFCC33;
+    --tag-border:#FF9933;
+    --stash:#CC66FF;
+    --stash-border:#CC33FF;
+}
+
 html {
     font-family: monospace;
 }
@@ -82,15 +97,15 @@ g.commit.unreachable > path {
 }
 
 circle.commit {
-    fill: #99FFFF !important;
+    fill: var(--local-commit) !important;
+    stroke: var(--local-commit-border);
     stroke-width: 2;
-    stroke: #3399FF;
 }
 
 .graphContainer.remote circle.commit {
-    fill: #FFCCCC !important;
+    fill: var(--remote-commit) !important;
+    stroke: var(--remote-commit-border);
     stroke-width: 2;
-    stroke: #993300;
 }
 
 .link {
@@ -116,22 +131,26 @@ g.ref > rect {
 }
 
 g.ref.branch > rect {
-    fill: #FFFF33;
-    stroke: #FFCC33;
+    fill: var(--local-ref);
+    stroke: var(--local-ref-border);
 }
 
 g.ref.remoteBranch > rect {
-    fill: #FFCCCC;
-    stroke: #993300;
+    fill: var(--remote-commit);
+    stroke: var(--remote-commit-border);
 }
 .graphContainer.remote g.ref.remoteBranch > rect {
-    fill: #99FFFF;
-    stroke: #3399FF;
+    fill: var(--local-commit);
+    stroke: var(--local-commit-border);
 }
 
 g.ref.tag > rect {
-    fill: #FFCC33;
-    stroke: #FF9933;
+    fill: var(--tag);
+    stroke: var(--tag-border);
+}
+g.ref.stash > rect {
+    fill: var(--stash);
+    stroke: var(--stash-border);
 }
 
 g.ref.head > text {
@@ -139,8 +158,8 @@ g.ref.head > text {
 }
 
 g.ref.head > rect {
-    fill: #CCFFCC;
-    stroke: #339900;
+    fill: var(--head);
+    stroke: var(--head-border);
     stroke-width: 2;
 }
 
