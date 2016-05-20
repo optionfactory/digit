@@ -82,9 +82,9 @@ g.commit.unreachable > path {
 }
 
 circle.commit {
-    fill: #CCFFCC !important;
+    fill: #99FFFF !important;
     stroke-width: 2;
-    stroke: #339900;
+    stroke: #3399FF;
 }
 
 .graphContainer.remote circle.commit {
@@ -95,7 +95,7 @@ circle.commit {
 
 .link {
     stroke: #999;
-    stroke-opacity: 1.2;
+    stroke-opacity: 1.4;
     fill: none;
 }
 
@@ -116,13 +116,22 @@ g.ref > rect {
 }
 
 g.ref.branch > rect {
-    fill: #FFCC66;
-    stroke: #CC9900;
+    fill: #FFFF33;
+    stroke: #FFCC33;
+}
+
+g.ref.remoteBranch > rect {
+    fill: #FFCCCC;
+    stroke: #993300;
+}
+.graphContainer.remote g.ref.remoteBranch > rect {
+    fill: #99FFFF;
+    stroke: #3399FF;
 }
 
 g.ref.tag > rect {
-    fill: #7FC9FF;
-    stroke: #0026FF;
+    fill: #FFCC33;
+    stroke: #FF9933;
 }
 
 g.ref.head > text {

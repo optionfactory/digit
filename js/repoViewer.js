@@ -171,7 +171,23 @@ RepoViewer.prototype = {
         me.refs = [];
         positionedData.forEach(function(node) {
             var index = 0;
-            me.refs = me.refs.concat(me.currentState.branches
+            var processRefsAndAttachToNode = function(references, tagAs) {
+                me.refs = me.refs.concat(references
+                    .filter(function(ref) {
+                        return ref.commitId === node.id
+                    }).map(function(ref) {
+                        ref.type = tagAs;
+                        ref.position = index++;
+                        ref.node = node;
+                        return ref;
+                    }));
+            }
+            processRefsAndAttachToNode(me.currentState.branches, "branch");
+            processRefsAndAttachToNode(me.currentState.remoteBranches, "remoteBranch");
+            processRefsAndAttachToNode(me.currentState.tags, "tag");
+            processRefsAndAttachToNode(me.currentState.stash, "branch");
+
+/*            me.refs = me.refs.concat(me.currentState.branches
                 .filter(function(ref) {
                     return ref.commitId === node.id
                 }).map(function(ref) {
@@ -189,7 +205,7 @@ RepoViewer.prototype = {
                     ref.node = node;
                     return ref;
                 }));
-            positionedById.set(node.id, node);
+  */          positionedById.set(node.id, node);
             me.coordsById.set(node.id, { x: node.x, y: node.y });
         });
 
