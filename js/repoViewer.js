@@ -69,9 +69,11 @@ RepoViewer.prototype = {
                 me.zoomBehavior.translate([0, 0]);
                 me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
             });
+
         containerDiv.append("button")
             .attr("class", "gotoHead")
             .on("click", me._positionOnHEAD.bind(me));
+
         //the main svg:g element, used to zoom/pan
         this.zoomableCanvas = svg.append("g")
             .attr("x", 0)
@@ -80,6 +82,9 @@ RepoViewer.prototype = {
             .attr("height", me.canvas.height);
 
         this.commitsG = this.zoomableCanvas.append("g");
+        this.referencesG = this.zoomableCanvas.append("g");
+        this.tooltipDiv = d3.select("div.tooltip");
+
         this._renderItems();
     },
     update: function(history, isFirstUpdate) {
@@ -93,16 +98,42 @@ RepoViewer.prototype = {
     _positionOnHEAD: function() {
         var me = this;
         var headCoords = me.coordsById.get("HEAD");
-        var dcx = (me.canvas.width / 2 - headCoords.x * me.zoomBehavior.scale());
-        var dcy = (me.canvas.height / 2 - headCoords.y * me.zoomBehavior.scale());
+
+        var dcx = headCoords ? (me.canvas.width / 2 - headCoords.x * me.zoomBehavior.scale()) : 225;
+        var dcy = headCoords ? (me.canvas.height / 2 - headCoords.y * me.zoomBehavior.scale()) : 190 + 40;
         me.zoomBehavior.translate([dcx, dcy]);
         me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
+    },
+    _copyTextContent: function(t) {
+        var range = document.createRange();
+        range.selectNodeContents(this);
+        window.getSelection().addRange(range);
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.log('copy fail.');
+        }
+        window.getSelection().empty();
+    },
+    _updateTooltipDiv: function(commit) {
+        var cm = commit.originalNode
+        d3.select("#tooltip_commit_id").text(cm.id)
+        d3.select("#tooltip_author_name").text(cm.author_name)
+        d3.select("#tooltip_author_email").text(cm.author_email)
+        d3.select("#tooltip_author_date").text(cm.author_date)
+        d3.select("#tooltip_committer_name").text(cm.committer_name)
+        d3.select("#tooltip_committer_email").text(cm.committer_email)
+        d3.select("#tooltip_committer_date").text(cm.committer_date)
+        d3.select("#tooltip_message").text(cm.message)
+        d3.select("#tooltip_parents").text(cm.parents.map(function(p) {
+            return p.substr(0, 6)
+        }).toString())
+
+        this.tooltipDiv.style("opacity", "1");
     },
     _renderItems: function() {
         var me = this;
         var color = d3.scale.category20();
-
-        var tooltip = d3.select("div.tooltip");
 
         var startingPoint = {
             x: 2 * me.commitRadius * me.zoomBehavior.scale(),
@@ -113,7 +144,7 @@ RepoViewer.prototype = {
             betweenDirectrixesStep: me.spacingY,
             startingPoint: startingPoint,
             mainDirectrix: me.canvas.height / 2
-        }).positionNodes(this.currentState.commits);
+        }).positionNodes(me.currentState.commits);
 
         var repoPathLabel = me.containerDiv
             .selectAll("#repoPath")
@@ -136,22 +167,26 @@ RepoViewer.prototype = {
 
         this.coordsById = d3.map();
         var positionedById = d3.map();
+
+        me.refs = [];
         positionedData.forEach(function(node) {
             var index = 0;
-            node.refs = me.currentState.branches
+            me.refs = me.refs.concat(me.currentState.branches
                 .filter(function(ref) {
                     return ref.commitId === node.id
                 }).map(function(ref) {
                     ref.type = "branch";
                     ref.position = index++;
+                    ref.node = node;
                     return ref;
-                });
-            node.refs = node.refs.concat(me.currentState.tags
+                }));
+            me.refs = me.refs.concat(me.currentState.tags
                 .filter(function(ref) {
                     return ref.commitId === node.id
                 }).map(function(ref) {
                     ref.type = "tag";
                     ref.position = index++;
+                    ref.node = node;
                     return ref;
                 }));
             positionedById.set(node.id, node);
@@ -184,50 +219,24 @@ RepoViewer.prototype = {
                 me.zoomBehavior.translate([dcx, dcy]);
                 me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
             })
-            .on("mouseover", function(commit) {
-                var cm = commit.originalNode
-                d3.select("#tooltip_commit_id").text(cm.id)
-                d3.select("#tooltip_author_name").text(cm.author_name)
-                d3.select("#tooltip_author_email").text(cm.author_email)
-                d3.select("#tooltip_author_date").text(cm.author_date)
-                d3.select("#tooltip_committer_name").text(cm.committer_name)
-                d3.select("#tooltip_committer_email").text(cm.committer_email)
-                d3.select("#tooltip_committer_date").text(cm.committer_date)
-                d3.select("#tooltip_message").text(cm.message)
-                d3.select("#tooltip_parents").text(cm.parents.map(function(p) {
-                    return p.substr(0, 6)
-                }).toString())
-
-                tooltip.style("opacity", "1");
-            })
+            .on("mouseover", me._updateTooltipDiv.bind(me))
             .on("mousemove", function(commit) {
-                tooltip
+                me.tooltipDiv
                     .style("left", Math.max(0, d3.event.pageX - 150) + "px")
                     .style("top", (d3.event.pageY + 20) + "px");
             })
             .on("mouseout", function() {
-                return tooltip.style("opacity", "0");
+                return me.tooltipDiv.style("opacity", "0");
             })
             .attr("r", this.commitRadius)
             .transition("inflate")
             .duration(500)
 
-        var copyTextContent = function(t) {
-            var range = document.createRange();
-            range.selectNodeContents(this);
-            window.getSelection().addRange(range);
-            try {
-                document.execCommand('copy');
-            } catch (err) {
-                console.log('copy fail.');
-            }
-            window.getSelection().empty();
-        };
 
         newCommits
             .append("text")
             .attr("class", "commitId")
-            .on("dblclick", copyTextContent)
+            .on("dblclick", me._copyTextContent)
             .text(function(node) {
                 return node.id.substr(0, 6)
             })
@@ -313,47 +322,36 @@ RepoViewer.prototype = {
 
         links.exit().remove();
 
-
-        var refs =
-            commits
+        var referencesG = me.referencesG
             .selectAll('g.ref')
-            .data(function(node) {
-                return node.refs.map(function(ref) {
-                    ref.node = node;
-                    return ref;
-                });
-            }, pluck("id"))
+            .data(me.refs, pluck("id"))
 
-        var newRefs = refs
+        referencesG.exit().remove();
+
+        var newReferenceG = referencesG
             .enter()
             .append("g")
             .attr("class", pluck("type"))
-            .classed("ref", true);
+            .classed("ref", true)
+            .classed("mario", true)
 
-        newRefs.append("rect");
+        newReferenceG
+            .append("rect")
 
-        newRefs.append("text")
+        var texts = newReferenceG
+            .append("text")
             .attr("class", "refText")
             .text(pluck("id"))
-            .on("dblclick", copyTextContent)
+            .on("dblclick", me._copyTextContent)
 
-        refs
-            .select("text")
-            .attr("x", function(ref) {
-                return ref.node.x;
-            })
-            .attr("y", function(ref) {
-                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius * 1.4 * ref.position;
-                me.coordsById.set(ref.id, { x: ref.node.x, y: refY });
-                return refY;
-            });
+        var refBBoxById = d3.map();
 
-        var refsBBoxById = d3.map();
-        refs
+        referencesG
             .selectAll("text")
             .forEach(function(refTexts) {
                 var bbox = refTexts[0].getBBox();
-                refsBBoxById.set(refTexts[0].textContent, bbox);
+                var refId = refTexts[0].textContent //hackish
+                refBBoxById.set(refId, bbox);
                 d3.select(refTexts[0].parentNode)
                     .select("rect")
                     .attr("x", bbox.x - 2)
@@ -362,7 +360,14 @@ RepoViewer.prototype = {
                     .attr("height", bbox.height + 4)
             })
 
-        refs.exit().remove();
+        referencesG
+            .transition()
+            .attr("transform", function(ref) {
+                var refX = ref.node.x;
+                var refY = ref.node.y + 2 * me.commitRadius + me.commitRadius * 1.4 * ref.position;
+                me.coordsById.set(ref.id, { x: refX, y: refY });
+                return "translate(" + refX + " " + refY + ")";
+            })
 
         var headG = this
             .zoomableCanvas
@@ -374,32 +379,25 @@ RepoViewer.prototype = {
         headG
             .transition()
             .attr("transform", function() {
-                var headX = function(h) {
-                    if (head.branchId && refsBBoxById.has(head.branchId)) {
-                        me.coordsById.set("HEAD", me.coordsById.get(head.branchId));
-                        var refbb = refsBBoxById.get(head.branchId);
-                        return refbb.x + refbb.width + 10;
-                    }
-                    if (head.commitId && commitBBoxById.has(head.commitId)) {
-                        me.coordsById.set("HEAD", me.coordsById.get(head.commitId));
-                        var commitBB = commitBBoxById.get(head.commitId);
-                        return commitBB.x + commitBB.width + 10;
-                    }
-                    return 0;
-                }();
-
-                var headY = function(h) {
-                    if (head.branchId && refsBBoxById.has(head.branchId)) {
-                        var refbb = refsBBoxById.get(head.branchId);
-                        return refbb.y + refbb.height - 4;
-                    }
-                    if (head.commitId && commitBBoxById.has(head.commitId)) {
-                        var commitBB = commitBBoxById.get(head.commitId);
-                        return commitBB.y + commitBB.height - 4;
-                    }
-                    return 0;
-                }();
-                return "translate(" + headX + " " + headY + ")";
+                if (head.branchId && me.coordsById.get(head.branchId) && refBBoxById.get(head.branchId)) {
+                    var refCoords = me.coordsById.get(head.branchId);
+                    me.coordsById.set("HEAD", refCoords);
+                    var refbb = refBBoxById.get(head.branchId);
+                    // refbb coordinates are relative to the containing g
+                    var headX = refCoords.x + refbb.x + refbb.width + 10;
+                    var headY = refCoords.y + refbb.y + refbb.height - 4;
+                    return "translate(" + headX + " " + headY + ")";
+                }
+                if (head.commitId) {
+                    var commitCoords = me.coordsById.get(head.commitId);
+                    me.coordsById.set("HEAD", commitCoords);
+                    var commitBB = commitBBoxById.get(head.commitId);
+                    // commitBB coordinates are absolute
+                    var headX = commitBB.x + commitBB.width + 10;
+                    var headY = commitBB.y + commitBB.height - 4;
+                    return "translate(" + headX + " " + headY + ")";
+                }
+                return "translate(0 0)";
             })
 
         var newHead = headG
@@ -413,7 +411,7 @@ RepoViewer.prototype = {
         newHead.append("text")
             .attr("class", "refText")
             .text("HEAD")
-            .on("dblclick", copyTextContent)
+            .on("dblclick", me._copyTextContent)
 
         var headText = headG.select("text");
         headG
