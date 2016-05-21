@@ -1,10 +1,14 @@
 :root{
     --local-commit:#99FFFF;
     --local-commit-border:#3399FF;
+    --local-commit-selected:#3399FF;
+    --local-commit-border-selected:#99FFFF;
     --local-ref:#FFFF33;
     --local-ref-border:#996633;
     --remote-commit:#FFCCCC;
     --remote-commit-border:#993300;
+    --remote-commit-selected:#993300;
+    --remote-commit-border-selected:#FFCCCC;
     --head:#CCFFCC;
     --head-border:#339900;
     --tag:#FFCC33;
@@ -14,7 +18,7 @@
 }
 
 html {
-    font-family: monospace;
+    font-family: 'Droid Sans', sans-serif;    
 }
 
 div .svg-container {
@@ -39,7 +43,6 @@ svg {
 
 text {
     font-size: 16px;
-    font-family: monospace;
     letter-spacing: -1.5px;
 }
 
@@ -97,15 +100,25 @@ g.commit.unreachable > path {
 }
 
 circle.commit {
-    fill: var(--local-commit) !important;
+    fill: var(--local-commit);
     stroke: var(--local-commit-border);
     stroke-width: 2;
 }
 
+circle.commit.selected {
+    fill: var(--local-commit-selected);
+    stroke: var(--local-commit-border-selected);
+}
+
 .graphContainer.remote circle.commit {
-    fill: var(--remote-commit) !important;
+    fill: var(--remote-commit);
     stroke: var(--remote-commit-border);
     stroke-width: 2;
+}
+
+.graphContainer.remote circle.commit.selected {
+    fill: var(--remote-commit-selected);
+    stroke: var(--remote-commit-border-selected);
 }
 
 .link {
@@ -172,5 +185,5 @@ g.ref.head > rect {
     border: solid gray;
     position: absolute;
     text-align: left;
-    font-size: 25px
+    font-size: 18px
 }

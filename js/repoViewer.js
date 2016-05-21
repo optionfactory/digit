@@ -217,13 +217,17 @@ RepoViewer.prototype = {
                 me.zoomBehavior.translate([dcx, dcy]);
                 me.zoomableCanvas.transition().attr('transform', 'translate(' + me.zoomBehavior.translate() + ') scale(' + me.zoomBehavior.scale() + ')')
             })
-            .on("mouseover", me._updateTooltipDiv.bind(me))
+            .on("mouseover", function(node) {
+                this.classList.add("selected");
+                me._updateTooltipDiv(node);
+            })
             .on("mousemove", function(commit) {
                 me.tooltipDiv
                     .style("left", Math.max(0, d3.event.pageX - 150) + "px")
                     .style("top", (d3.event.pageY + 20) + "px");
             })
             .on("mouseout", function() {
+                this.classList.remove("selected");
                 return me.tooltipDiv.style("opacity", "0");
             })
             .attr("r", this.commitRadius)
