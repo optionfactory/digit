@@ -224,7 +224,7 @@ RepoViewer.prototype = {
             .on("mousemove", function(commit) {
                 me.tooltipDiv
                     .style("left", Math.max(0, d3.event.pageX - 150) + "px")
-                    .style("top", (d3.event.pageY + 20) + "px");
+                    .style("top", (d3.event.pageY + 60) + "px");
             })
             .on("mouseout", function() {
                 this.classList.remove("selected");
