@@ -43,7 +43,9 @@ svg {
 
 text {
     font-size: 16px;
+    /* Disabled due to abysmal performance on chrome :-/ 
     letter-spacing: -1.5px;
+    */
 }
 
 .pathLabel {
