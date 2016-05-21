@@ -1,0 +1,41 @@
+body,
+html {
+    height: 100%;
+}
+
+.svg-container {
+    display: block;
+    overflow: auto;
+    border: 1px dotted #AAA;
+}
+
+.node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: .6;
+    fill: none;
+}
+
+div .svgContainer {
+    margin: 5px;
+    position:relative;
+    display: inline-block;
+}
+
+.reset {
+    position: absolute;
+    background:url(reset.png);
+    width: 20px;
+    height: 20px;
+    top: 5px;
+    right: 5px;
+    background-color: Transparent;
+            background-repeat:no-repeat;
+            border: none;
+    overflow: hidden;
+    outline:none;
+}
