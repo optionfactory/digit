@@ -96,10 +96,11 @@ class MyEventHandler(FileSystemEventHandler):
         GET_BRANCHES="git -C {0} show-ref --heads"
         GET_REMOTE_BRANCHES="git -C {0} show-ref | grep refs/remotes/"
         GET_STASH="git -C {0} show-ref | grep refs/stash"
+        GET_STATUS="git -C {0} status --porcelain"
         GET_HEAD_COMMIT="git -C {0} show-ref --head | grep HEAD"
         GET_HEAD_BRANCH="git -C {0} symbolic-ref --short HEAD 2>/dev/null"
 
-        history = {"name": self.name, "path": os.path.abspath(self.path), "commits": [], "tags": [], "stash": [], "branches": [],"remoteBranches": [], "head": None}
+        history = {"name": self.name, "path": os.path.abspath(self.path), "commits": [], "tags": [], "stash": [], "branches": [],"remoteBranches": [], "head": None, "status":[]}
 
         def readCommits(cmd, unreachable=False):
             try:
@@ -135,12 +136,32 @@ class MyEventHandler(FileSystemEventHandler):
                 if ref["id"].endswith("^{}"):
                     ref["id"] = ref["id"][:-3]
             history[key].extend(refs)
+            for line in output:
+                if not len(line):
+                    continue
+                hash, ref = line.split(" ")
+
+        def readStatus(cmd, key):
+            differences=[]
+            try:
+                output=subprocess.check_output(cmd, shell=True).split("\n")
+            except:
+                output=""
+            for line in output:
+                if not len(line):
+                    continue
+                stagingToCommit=line[0]
+                workingCopyToStaging=line[1]
+                filename=line[2:]
+                differences.append({"filename": filename, "workingCopyToStaging": workingCopyToStaging, "stagingToCommit": stagingToCommit})
+            history[key].extend(differences)
+           
 
         readRefs(GET_TAGS.format(self.path), "tags")
         readRefs(GET_BRANCHES.format(self.path), "branches")
         readRefs(GET_REMOTE_BRANCHES.format(self.path), "remoteBranches")
         readRefs(GET_STASH.format(self.path), "stash")
-
+        readStatus(GET_STATUS.format(self.path), "status")
         try:
             head = subprocess.check_output(GET_HEAD_BRANCH.format(self.path), shell=True).strip()
             history["head"] = {"branchId": head}

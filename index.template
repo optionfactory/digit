@@ -12,8 +12,14 @@
 <script type="text/javascript">
     var names = $$NAMES$$
 </script>
-    <div id="local" class="graphContainer"></div>
-    <div id="remote" class="graphContainer remote"></div>
+    <div id="local" class="graphContainer">
+        <div class="svg-container"></div>
+        <div class="status-container"></div>
+    </div>
+    <div id="remote" class="graphContainer remote">
+        <div class="svg-container"></div>
+        <div class="status-container"></div>
+    </div>
     <script src="lib/d3.v3.js"></script>
     <script src="graph-algorithm/graphPaths.js" charset="utf-8"></script>
     <script src="graph-algorithm/CoordinatesCalculator.js" charset="utf-8"></script>

@@ -6,7 +6,8 @@ function RepoViewer(config) {
         tags:  [],
         head: {
             branchId: "master"
-        }
+        },
+        status:[]
     }
     this.coordsById = d3.map();
 
@@ -20,16 +21,21 @@ function RepoViewer(config) {
 RepoViewer.prototype = {
     render: function(container) {
 
-        this.canvas = {
-            width: parseInt(container.style('width'), 10),
-            height: parseInt(container.style('height'), 10)
-        }
-
         //create a wrapper div to hold svg and buttons together
         var me = this;
-        var containerDiv = container
-            .append("div")
-            .attr("class", "svg-container");
+        var containerDiv = container.select(".svg-container");
+        var statusDiv = container.select(".status-container");
+
+        this.canvas = {
+            width: parseInt(containerDiv.style('width'), 10),
+            height: parseInt(containerDiv.style('height'), 10)
+        }
+
+        me.untrackedDiv = statusDiv.append("div").text("Untracked files:").classed("statusEntry", true).append("ul").classed("wcToStaging", true)
+        me.toStageDiv = statusDiv.append("div").text("Changes not staged for commit:").classed("statusEntry", true).append("ul").classed("wcToStaging", true)
+        me.toCommitDiv = statusDiv.append("div").text("Changes to be committed:").classed("statusEntry", true).append("ul").classed("stagingToHEAD", true)
+
+
         me.containerDiv = containerDiv;
 
         this.zoomBehavior = d3.behavior.zoom()
@@ -134,6 +140,33 @@ RepoViewer.prototype = {
     _renderItems: function() {
         var me = this;
         var color = d3.scale.category20();
+
+        var untracked = me.untrackedDiv
+            .selectAll("li")
+            .data(me.currentState.status.filter(function(item){
+                return item.workingCopyToStaging==="?"
+            }));
+        untracked.enter().append("li")
+        untracked.text(function(x){ return x.filename; });
+        untracked.exit().remove()
+
+        var toStage = me.toStageDiv
+            .selectAll("li")
+            .data(me.currentState.status.filter(function(item){
+                return [" ","?"].indexOf(item.workingCopyToStaging)===-1
+            }));
+        toStage.enter().append("li")
+        toStage.text(function(x){ return x.workingCopyToStaging+": "+ x.filename; });
+        toStage.exit().remove()
+
+        var toCommit = me.toCommitDiv
+            .selectAll("li")
+            .data(me.currentState.status.filter(function(item){
+                return [" ","?"].indexOf(item.stagingToCommit)===-1
+            }));
+        toCommit.enter().append("li")
+        toCommit.text(function(x){ return x.stagingToCommit+": "+  x.filename; });
+        toCommit.exit().remove()
 
         var startingPoint = {
             x: 2 * me.commitRadius * me.zoomBehavior.scale(),
