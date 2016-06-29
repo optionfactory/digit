@@ -236,10 +236,19 @@ RepoViewer.prototype = {
             .enter()
             .append("g")
             .classed("commit", true)
+            .attr("id", function(c){return "hash_"+c.id;})
             .classed('unreachable', function(c) {
                 return c.originalNode.unreachable
             });
 
+        var makeVisible = function(commitId){
+            var commitG = d3.select("#hash_"+commitId);
+            commitG.classed("notReachable",false);
+            var parents = commitG.datum().originalNode.parents;
+            for(parentIdx in parents){
+                makeVisible(parents[parentIdx]);
+            }
+        }
         newCommits.append("circle")
             .attr("class", "commit")
             .on("dblclick.zoom", function(d) {
@@ -252,6 +261,8 @@ RepoViewer.prototype = {
             })
             .on("mouseover", function(node) {
                 this.classList.add("selected");
+                me.containerDiv.selectAll("g.commit").classed("notReachable",true);
+                makeVisible(d3.select(this.parentNode).datum().id);
                 me._updateTooltipDiv(node);
             })
             .on("mousemove", function(commit) {
@@ -261,6 +272,7 @@ RepoViewer.prototype = {
             })
             .on("mouseout", function() {
                 this.classList.remove("selected");
+                me.containerDiv.selectAll("g.commit").classed("notReachable",false);
                 return me.tooltipDiv.style("opacity", "0");
             })
             .attr("r", this.commitRadius)

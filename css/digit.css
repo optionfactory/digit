@@ -116,6 +116,10 @@ g.commit.unreachable > path {
     stroke: #AAAAAA;
 }
 
+g.commit.notReachable  {
+    opacity:0.15;
+}
+
 circle.commit {
     fill: var(--local-commit);
     stroke: var(--local-commit-border);
