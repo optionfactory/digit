@@ -47,9 +47,6 @@ func main() {
 	})
 	// http.HandleFunc("/websocket", websocket.Handler(Echo))
 	http.Handle("/", http.FileServer(http.Dir(".")))
-	if err := http.ListenAndServe(":8000", nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -72,5 +69,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if err := http.ListenAndServe(":8000", nil); err != nil {
+		log.Fatal("ListenAndServe:", err)
 	}
 }
