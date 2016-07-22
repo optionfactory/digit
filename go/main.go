@@ -4,9 +4,9 @@ import (
 	// "encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/howeyc/fsnotify"
+	"github.com/howeyc/fsnotify" // No recursive support
+	// "https://godoc.org/github.com/rjeczalik/notify" // Recursive support!!
 	"github.com/optionfactory/digit/git"
-	// "golang.org/x/net/websocket"
 	"github.com/tjgq/broadcast"
 	"html/template"
 	"log"
@@ -101,7 +101,8 @@ func main() {
 					r.Update()
 					updates.Send(*r)
 				case event := <-watcher.Event:
-					solicitationsMap[r.Name] <- true
+					r.Update()
+					updates.Send(*r)
 					log.Println("event:", event)
 				case err := <-watcher.Error:
 					// TODO
