@@ -22,7 +22,9 @@ type Repo struct {
 	Path string
 }
 
-type Update struct{}
+type Update struct {
+	RepoName string
+}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -30,15 +32,26 @@ var upgrader = websocket.Upgrader{
 }
 
 func echoHandler(updateListener *broadcast.Listener, w http.ResponseWriter, r *http.Request) {
+	repoName := r.FormValue("name")
+	log.Println("listening for", repoName)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	for update := range updateListener.Ch {
+	for updateEvent := range updateListener.Ch {
+		update, ok := updateEvent.(*Update)
+		if !ok {
+			continue
+		}
+		log.Println("cast gave", ok)
+		if repoName != update.RepoName {
+			continue
+		}
 		err = conn.WriteJSON(update)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 	}
@@ -77,17 +90,19 @@ func main() {
 	})
 	http.Handle("/", http.FileServer(http.Dir(".")))
 
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	for _, r := range target_repos {
+		watcher, err := fsnotify.NewWatcher()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		go func() {
 			for {
 				select {
 				case event := <-watcher.Event:
-					updates.Send(&Update{})
+					updates.Send(&Update{
+						RepoName: r.Name,
+					})
 					log.Println("event:", event)
 				case err := <-watcher.Error:
 					// TODO
