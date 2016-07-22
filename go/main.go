@@ -3,6 +3,7 @@ package main
 import (
 	// "encoding/json"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"github.com/howeyc/fsnotify"
 	// "golang.org/x/net/websocket"
 	"html/template"
@@ -18,6 +19,31 @@ var templates = template.Must(template.ParseFiles("index.template.go"))
 type Repo struct {
 	Name string
 	Path string
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func echoHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for {
+		err = conn.WriteJSON([]string{"asd", "bsd"})
+		if err != nil {
+			return
+		}
+
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			return
+		}
+	}
 }
 
 func main() {
@@ -45,7 +71,7 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
-	// http.HandleFunc("/websocket", websocket.Handler(Echo))
+	http.HandleFunc("/ws", echoHandler)
 	http.Handle("/", http.FileServer(http.Dir(".")))
 
 	watcher, err := fsnotify.NewWatcher()
@@ -71,7 +97,7 @@ func main() {
 		}
 	}
 
-	if err := http.ListenAndServe(":8000", nil); err != nil {
+	if err := http.ListenAndServe(":9000", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
