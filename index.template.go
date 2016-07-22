@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>DigIt</title>
+    <link rel="stylesheet" href="css/digit.css">
+    <link rel="shortcut icon" href="/favicon.ico">
+</head>
+
+<body>
+<script type="text/javascript">
+    var names = {{.}}
+</script>
+    <div id="local" class="graphContainer">
+        <div class="svg-container"></div>
+        <div class="status-container"></div>
+    </div>
+    <div id="remote" class="graphContainer remote">
+        <div class="svg-container"></div>
+        <div class="status-container"></div>
+    </div>
+    <script src="lib/d3.v3.js"></script>
+    <script src="graph-algorithm/graphPaths.js" charset="utf-8"></script>
+    <script src="graph-algorithm/CoordinatesCalculator.js" charset="utf-8"></script>
+    <script src="js/jsOverrides.js" charset="utf-8"></script>
+    <script src="js/repoViewer.js"></script>
+    <script src="js/digit.js"></script>
+</body>
+<div class="tooltip" >
+    <table>
+        <tr><td>Commit id:</td><td><span id="tooltip_commit_id">9e8ca61356f92481bf15b0248e5f3076f0c98225</span></td></tr>
+        <tr><td>Author:</td><td><span id="tooltip_author_name">Davide Salvador</span> &lt;<span id="tooltip_author_email">davide@optionfactory.net</span>&gt;</td></tr>
+        <tr><td>Author Date:</td><td><span id="tooltip_author_date">Thu May 5 10:57:48 2016 +0200</span></td></tr>
+        <tr><td>Committer:</td><td><span id="tooltip_committer_name">Davide Salvador</span> &lt;<span id="tooltip_committer_email">davide@optionfactory.net</span>&gt;</td></tr>
+        <tr><td>Committer Date:</td><td><span id="tooltip_committer_date">Thu May 5 10:57:48 2016 +0200</span></td></tr>
+        <tr><td>Message:</td><td><span id="tooltip_message">both orphan and normal commits are now more visible</span></td></tr>
+        <tr><td>Parents:</td><td><span id="tooltip_parents">aaa,bbb</span></td></tr>
+    </table>
+</div>
+</html>
