@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/howeyc/fsnotify"
 	// "golang.org/x/net/websocket"
+	"github.com/tjgq/broadcast"
 	"html/template"
 	"log"
 	"net/http"
@@ -21,25 +22,22 @@ type Repo struct {
 	Path string
 }
 
+type Update struct{}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
 
-func echoHandler(w http.ResponseWriter, r *http.Request) {
+func echoHandler(updateListener *broadcast.Listener, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	for {
-		err = conn.WriteJSON([]string{"asd", "bsd"})
-		if err != nil {
-			return
-		}
-
-		_, _, err := conn.ReadMessage()
+	for update := range updateListener.Ch {
+		err = conn.WriteJSON(update)
 		if err != nil {
 			return
 		}
@@ -71,7 +69,12 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
-	http.HandleFunc("/ws", echoHandler)
+	var updates broadcast.Broadcaster
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		updateListener := updates.Listen()
+		defer updateListener.Close()
+		echoHandler(updateListener, w, r)
+	})
 	http.Handle("/", http.FileServer(http.Dir(".")))
 
 	watcher, err := fsnotify.NewWatcher()
@@ -84,8 +87,10 @@ func main() {
 			for {
 				select {
 				case event := <-watcher.Event:
+					updates.Send(&Update{})
 					log.Println("event:", event)
 				case err := <-watcher.Error:
+					// TODO
 					log.Println("error:", err)
 				}
 			}
