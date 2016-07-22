@@ -229,7 +229,7 @@ func (self *Repo) stashContent() []Ref {
 
 type HeadRef struct {
 	BranchId string `json:"branchId"`
-	//CommitId string `json:"commitId"`
+	CommitId string `json:"commitId"`
 }
 
 func (self *Repo) headCommit() HeadRef {
@@ -248,9 +248,8 @@ func (self *Repo) headCommit() HeadRef {
 	if err2 != nil {
 		panic(err)
 	}
-	_ = refs
 	return HeadRef{
-	//		CommitId: refs[0].Hash,
+		CommitId: refs[0].Hash,
 	}
 }
 
