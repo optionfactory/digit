@@ -31,10 +31,9 @@ RepoViewer.prototype = {
             height: parseInt(containerDiv.style('height'), 10)
         }
 
-        me.untrackedDiv = statusDiv.append("div").text("Untracked files:").classed("statusEntry", true).append("ul").classed("wcToStaging", true)
-        me.toStageDiv = statusDiv.append("div").text("Changes not staged for commit:").classed("statusEntry", true).append("ul").classed("wcToStaging", true)
         me.toCommitDiv = statusDiv.append("div").text("Changes to be committed:").classed("statusEntry", true).append("ul").classed("stagingToHEAD", true)
-
+        me.toStageDiv = statusDiv.append("div").text("Changes not staged for commit:").classed("statusEntry", true).append("ul").classed("wcToStaging", true)
+        me.untrackedDiv = statusDiv.append("div").text("Untracked files:").classed("statusEntry", true).append("ul").classed("wcToStaging", true)
 
         me.containerDiv = containerDiv;
 
