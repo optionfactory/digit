@@ -69,77 +69,6 @@ type Ref struct {
 	Hash string `json:"commitId"`
 }
 
-func (self *Repo) readReferences(opts []string, filter filter) ([]Ref, error) {
-	args := []string{"-C", self.Path, "show-ref"}
-	args = append(args, opts...)
-	cmd := exec.Command("git", args...)
-	stderr, _ := cmd.StderrPipe()
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	if err := cmd.Start(); err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	result := make([]Ref, 0)
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		line := strings.Trim(scanner.Text(), " \t")
-		if line == "" {
-			continue
-		}
-		if filter(line) {
-			ref, err := parseRef(scanner.Text())
-			if err == nil {
-				result = append(result, ref)
-			}
-		}
-	}
-	if err := cmd.Wait(); err != nil {
-		log.Println(err)
-	}
-
-	sscanner := bufio.NewScanner(stderr)
-	for sscanner.Scan() {
-		log.Println(sscanner.Text())
-	}
-	return result, nil
-}
-
-func (self *Repo) readHEADRef() (string, error) {
-	args := []string{"-C", self.Path, "symbolic-ref", "--short", "HEAD"}
-	cmd := exec.Command("git", args...)
-	stderr, _ := cmd.StderrPipe()
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Println(err)
-		return "", err
-	}
-	if err := cmd.Start(); err != nil {
-		log.Println(err)
-		return "", err
-	}
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		line := strings.Trim(scanner.Text(), " \t")
-		if line == "" {
-			continue
-		}
-		return scanner.Text(), nil
-	}
-	if err := cmd.Wait(); err != nil {
-		log.Println(err)
-	}
-
-	sscanner := bufio.NewScanner(stderr)
-	for sscanner.Scan() {
-		log.Println(sscanner.Text())
-	}
-	return "", nil
-}
-
 func (self *Repo) readLines(opts []string, filter filter) ([]string, error) {
 	args := []string{"-C", self.Path}
 	args = append(args, opts...)
@@ -165,15 +94,44 @@ func (self *Repo) readLines(opts []string, filter filter) ([]string, error) {
 			result = append(result, scanner.Text())
 		}
 	}
-	if err := cmd.Wait(); err != nil {
-		log.Println(err)
-	}
-
 	sscanner := bufio.NewScanner(stderr)
 	for sscanner.Scan() {
 		log.Println(sscanner.Text())
 	}
+	if err := cmd.Wait(); err != nil {
+		log.Println(err)
+		return result, err
+	}
 	return result, nil
+}
+
+func (self *Repo) readReferences(opts []string, filter filter) ([]Ref, error) {
+	fullOpts := append([]string{"show-ref"}, opts...)
+	result := make([]Ref, 0)
+	lines, err := self.readLines(fullOpts, filter)
+	if err != nil {
+		return result, err
+	}
+	for _, line := range lines {
+		ref, err := parseRef(line)
+		if err == nil {
+			result = append(result, ref)
+		}
+	}
+	return result, nil
+}
+
+func (self *Repo) readHEADRef() (string, error) {
+	lines, err := self.readLines([]string{"symbolic-ref", "--short", "HEAD"}, always)
+	if err != nil {
+		return "", err
+	}
+	for _, line := range lines {
+		if len(line) > 0 {
+			return line, nil
+		}
+	}
+	return "", nil
 }
 
 func parseRef(text string) (Ref, error) {
