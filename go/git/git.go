@@ -100,7 +100,6 @@ func (self *Repo) readLines(opts []string, filter filter) ([]string, error) {
 	}
 	if err := cmd.Wait(); err != nil {
 		log.Println(err)
-		return result, err
 	}
 	return result, nil
 }
