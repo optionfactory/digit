@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 var version string
@@ -130,14 +131,30 @@ func main() {
 			log.Fatal(err)
 		}
 		go func() {
+			coalescing := false
+			cooling := false
+			timer := make(<-chan time.Time)
 			for {
 				select {
 				case replyChan := <-solicitationsMap[r.Name]:
 					replyChan <- *r
 				case event := <-watcher.Events:
-					r.Update()
-					updates.Send(*r)
+					if !coalescing && !cooling {
+						coalescing = true
+						timer = time.NewTimer(time.Second).C
+					}
 					log.Println("event:", event)
+				case _ = <-timer:
+					if coalescing {
+						coalescing = false
+						cooling = true
+						timer = time.NewTimer(time.Second).C
+						r.Update()
+						updates.Send(*r)
+						log.Println("propagated")
+					} else if cooling {
+						cooling = false
+					}
 				case err := <-watcher.Errors:
 					log.Println("error:", err)
 				}
