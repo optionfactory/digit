@@ -1,0 +1,3 @@
+[submodule "go/embedded-data/graph-algorithm"]
+	path = go/embedded-data/graph-algorithm
+	url = https://github.com/optionfactory/graph-algorithm.git
