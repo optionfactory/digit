@@ -1,7 +1,9 @@
 package http
 
 import (
+	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/websocket"
+	"github.com/optionfactory/digit/assets"
 	"github.com/optionfactory/digit/git"
 	"github.com/tjgq/broadcast"
 	"html/template"
@@ -9,8 +11,6 @@ import (
 	"net/http"
 	"sync"
 )
-
-var templates = template.Must(template.ParseFiles("index.template.go"))
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -64,9 +64,11 @@ func Listen(target_repos map[string]*git.Repo, updates *broadcast.Broadcaster, s
 	for name := range target_repos {
 		repo_names = append(repo_names, name)
 	}
+	templateText := assets.MustAsset("index.gotemplate")
+	var indexTemplate = template.Must(template.New("index.gotemplate").Parse(string(templateText)))
 
 	http.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
-		err := templates.ExecuteTemplate(w, "index.template.go", repo_names)
+		err := indexTemplate.Execute(w, repo_names)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -82,7 +84,7 @@ func Listen(target_repos map[string]*git.Repo, updates *broadcast.Broadcaster, s
 
 		wsHandler(merge(updateListener.Ch, solicitations), repoName, w, r)
 	})
-	http.Handle("/", http.FileServer(http.Dir(".")))
+	http.Handle("/", http.FileServer(&assetfs.AssetFS{Asset: assets.Asset, AssetDir: assets.AssetDir, AssetInfo: assets.AssetInfo, Prefix: ""}))
 
 	if err := http.ListenAndServe(":9000", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
