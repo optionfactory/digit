@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/optionfactory/digit/git"
 	"github.com/tjgq/broadcast"
+	"gopkg.in/fsnotify.v1"
 	"html/template"
 	"log"
 	"net/http"
@@ -132,14 +133,16 @@ func main() {
 		}
 		go func() {
 			coalescing := false
-			cooling := false
 			timer := make(<-chan time.Time)
 			for {
 				select {
 				case replyChan := <-solicitationsMap[r.Name]:
 					replyChan <- *r
 				case event := <-watcher.Events:
-					if !coalescing && !cooling {
+					if event.Op&fsnotify.Chmod == fsnotify.Chmod {
+						continue
+					}
+					if !coalescing {
 						coalescing = true
 						timer = time.NewTimer(time.Second).C
 					}
@@ -147,13 +150,9 @@ func main() {
 				case _ = <-timer:
 					if coalescing {
 						coalescing = false
-						cooling = true
-						timer = time.NewTimer(time.Second).C
 						r.Update()
 						updates.Send(*r)
 						log.Println("propagated")
-					} else if cooling {
-						cooling = false
 					}
 				case err := <-watcher.Errors:
 					log.Println("error:", err)
