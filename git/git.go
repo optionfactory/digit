@@ -233,7 +233,9 @@ func (self *Repo) unreachables() []Commit {
 	for _, line := range idLines {
 		unreacheableIds = append(unreacheableIds, strings.SplitN(line, " ", 3)[2])
 	}
-
+	if len(unreacheableIds) == 0 {
+		return nil
+	}
 	revListArgs := []string{"rev-list", "--no-walk", "--pretty=%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%s"}
 	revListArgs = append(revListArgs, unreacheableIds...)
 	lines, err := self.readLines(revListArgs, func(line string) bool {
