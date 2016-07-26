@@ -7,7 +7,17 @@ GID=$(shell id -g)
 VERSION:=$(shell git describe --tags --always 2>/dev/null||echo "untracked")
 SHELL = /bin/bash
 TOOLS_TO_INSTALL=github.com/jteeuwen/go-bindata 
-
+#set to true to skip tests execution 
+#e.g: make develop DEVELOP_SKIP_TESTS=true 
+DEVELOP_SKIP_TESTS=false
+#set to true to skip rebuilding the executable after test execution 
+#e.g: make develop DEVELOP_SKIP_BUILD=true 
+DEVELOP_SKIP_BUILD=false
+#set to a command to be executed inside the docker container after 
+#rebuilding the executable
+#e.g: make develop DEVELOP_AFTER_BUILD="killall my-exec; bin/my-exec &"
+#e.g: make develop DEVELOP_AFTER_BUILD="(sleep 10; echo TADAAAAAAA)&"	
+DEVELOP_AFTER_BUILD=
 
 ifeq ($(OS),Windows_NT)
 	BUILD_OS = windows
@@ -63,7 +73,9 @@ develop: FORCE
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		-ti \
 		$(GOLANG_IMAGE) \
-		make -f /go/Makefile develop-$(PROJECT)-$(BUILD_OS)-$(BUILD_ARCH) UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS}
+		make -f /go/Makefile develop-$(PROJECT)-$(BUILD_OS)-$(BUILD_ARCH) UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS} DEVELOP_SKIP_TESTS=${DEVELOP_SKIP_TESTS} DEVELOP_SKIP_BUILD=${DEVELOP_SKIP_BUILD} DEVELOP_AFTER_BUILD="${DEVELOP_AFTER_BUILD}"
+
+
 
 all: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
@@ -147,12 +159,24 @@ develop-$(PROJECT)-%: FORCE
 	@echo "* checking for suspicious constructs (go vet)"
 	-@GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go vet -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...
 	@#
-	@echo "* running tests"
-	-@GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go test -a $(TESTING_OPTIONS) -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...
+	@echo "* running tests: DEVELOP_SKIP_TESTS=${DEVELOP_SKIP_TESTS}"
+	@if [ "true" != "${DEVELOP_SKIP_TESTS}" ] ; then \
+		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go test -a $(TESTING_OPTIONS) -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...; \
+	fi
 	@#	
+	@echo "* compiling (go) DEVELOP_SKIP_BUILD=${DEVELOP_SKIP_BUILD}"
+	@if [ "true" != "${DEVELOP_SKIP_BUILD}" ] ; then \
+		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go install -a -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)"; \
+	fi
+	@#
 	@echo "* fixing file ownership uid:$(UID) gid:$(GID)"
 	-@chown -R ${UID}:${GID} "/go/bin/"
 	-@chown -R ${UID}:${GID} "/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/"	
+	@#
+	@echo "* executing command DEVELOP_AFTER_BUILD=${DEVELOP_AFTER_BUILD}"
+	@if [ "" != "${DEVELOP_AFTER_BUILD}" ] ; then \
+		eval "$${DEVELOP_AFTER_BUILD}"; \
+	fi
 	@echo ""
 	@echo ""
 	@echo ""
@@ -165,13 +189,21 @@ develop-$(PROJECT)-%: FORCE
 		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go generate -tags netgo -installsuffix netgo ./...; \
 		echo "* checking for suspicious constructs (go vet)"; \
 		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go vet -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...; \
-		echo "* running tests"; \
-		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go test -a $(TESTING_OPTIONS) -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...; \
-		echo "* compiling (go)"; \
-		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go install -a -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)"; \
+		echo "* running tests: DEVELOP_SKIP_TESTS=${DEVELOP_SKIP_TESTS}"; \
+		if [ "true" != "${DEVELOP_SKIP_TESTS}" ] ; then \
+			GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go test -a $(TESTING_OPTIONS) -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...; \
+		fi; \
+		echo "* compiling (go) DEVELOP_SKIP_BUILD=${DEVELOP_SKIP_BUILD}"; \
+		if [ "true" != "${DEVELOP_SKIP_BUILD}" ] ; then \
+			GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go install -a -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)"; \
+		fi; \
 		echo "* fixing file ownership uid:$(UID) gid:$(GID)"; \
 		chown -R ${UID}:${GID} "/go/bin/"; \
 		chown -R ${UID}:${GID} "/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/"; \
+		echo "* executing command DEVELOP_AFTER_BUILD=${DEVELOP_AFTER_BUILD}"; \
+		if [ "" != "${DEVELOP_AFTER_BUILD}" ] ; then \
+			eval "$${DEVELOP_AFTER_BUILD}"; \
+		fi; \
 		echo ""; \
 		echo ""; \
 		echo ""; \
