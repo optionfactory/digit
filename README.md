@@ -49,7 +49,7 @@ The build system relies on docker and GNU Make.
 ## Known Limitations
 
 * just a learning aid
-* not meant to scale (tested with repos with a couple hunder commits)
+* not meant to scale (tested with repos with a couple hundred commits)
 
 ## Authors
 
