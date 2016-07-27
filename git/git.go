@@ -248,10 +248,8 @@ func (self *Repo) headCommit() (HeadRef, error) {
 }
 
 func (self *Repo) reachables() ([]Commit, error) {
-	lines, cmderr := self.readLines([]string{"log", "--pretty=%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%s", "--reverse", "--all"}, always)
-	if cmderr != nil {
-		return nil, cmderr.Cause
-	}
+	lines, _ := self.readLines([]string{"log", "--pretty=%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%s", "--reverse", "--all"}, always)
+	// ignore the error, "git log" fails on an empty repo!
 	commits := make([]Commit, 0, len(lines))
 	for _, line := range lines {
 		commits = append(commits, parseCommit(line, false))
