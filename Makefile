@@ -88,13 +88,8 @@ all: FORCE
 		make -f /go/Makefile build UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS}
 
 build: \
-	$(PROJECT)-linux-386 $(PROJECT)-linux-amd64 $(PROJECT)-linux-arm \
-	$(PROJECT)-darwin-386 $(PROJECT)-darwin-amd64 \
-	$(PROJECT)-dragonfly-amd64 \
-	$(PROJECT)-freebsd-386 $(PROJECT)-freebsd-amd64 $(PROJECT)-freebsd-arm \
-	$(PROJECT)-netbsd-386 $(PROJECT)-netbsd-amd64 $(PROJECT)-netbsd-arm \
-	$(PROJECT)-openbsd-386 $(PROJECT)-openbsd-amd64 \
-	$(PROJECT)-solaris-amd64 \
+	$(PROJECT)-linux-386 $(PROJECT)-linux-amd64 \
+	$(PROJECT)-darwin-amd64 \
 	$(PROJECT)-windows-386 $(PROJECT)-windows-amd64
 
 #from https://github.com/golang/go/blob/master/src/go/build/syslist.go
