@@ -175,7 +175,9 @@ func (self *Repo) readReferences(opts []string, filter filter) ([]Ref, error) {
 
 func (self *Repo) readHEADRef() (string, error) {
 	lines, cmderr := self.readLines([]string{"symbolic-ref", "--short", "HEAD"}, always)
-	if cmderr != nil && cmderr.ExitStatus != 1 {
+	if cmderr != nil && cmderr.ExitStatus != 1 && cmderr.ExitStatus != 128 {
+		// "man git-symbolic-ref" says 1 == not a symbolic ref
+		// the actual command "git symbolic-ref" (git 2.1.4, 2.5.0) returns 128 in the same case
 		return "", cmderr.Cause
 	}
 	for _, line := range lines {
