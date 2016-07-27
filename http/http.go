@@ -59,7 +59,7 @@ func merge(cs ...<-chan interface{}) <-chan interface{} {
 	return out
 }
 
-func Listen(target_repos map[string]*git.Repo, updates *broadcast.Broadcaster, solicitationsMap map[string]chan chan interface{}) {
+func Listen(bindAddress string, target_repos map[string]*git.Repo, updates *broadcast.Broadcaster, solicitationsMap map[string]chan chan interface{}) {
 	var repo_names = []string{}
 	for name := range target_repos {
 		repo_names = append(repo_names, name)
@@ -80,13 +80,14 @@ func Listen(target_repos map[string]*git.Repo, updates *broadcast.Broadcaster, s
 		updateListener := updates.Listen()
 		defer updateListener.Close()
 		solicitations := make(chan interface{})
+		defer close(solicitations)
 		solicitationsMap[repoName] <- solicitations
 
 		wsHandler(merge(updateListener.Ch, solicitations), repoName, w, r)
 	})
 	http.Handle("/", http.FileServer(&assetfs.AssetFS{Asset: assets.Asset, AssetDir: assets.AssetDir, AssetInfo: assets.AssetInfo, Prefix: ""}))
 
-	if err := http.ListenAndServe(":9000", nil); err != nil {
+	if err := http.ListenAndServe(bindAddress, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }

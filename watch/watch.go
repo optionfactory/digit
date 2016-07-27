@@ -10,7 +10,9 @@ import (
 )
 
 func Watch(r *git.Repo, updates *broadcast.Broadcaster) chan chan interface{} {
-	r.Update()
+	if err := r.Update(); err != nil {
+		log.Fatal(err)
+	}
 	solicitations := make(chan chan interface{})
 	watcher, err := rfsnotify.NewWatcher()
 	if err != nil {
@@ -38,10 +40,12 @@ func Watch(r *git.Repo, updates *broadcast.Broadcaster) chan chan interface{} {
 				if len(coalescing) > 0 {
 					log.Println("events:", coalescing)
 					coalescing = []fsnotify.Event{}
-					r.Update()
+					if err := r.Update(); err != nil {
+						log.Fatal(err)
+					}
 					updates.Send(*r)
 				}
-			case err := <-watcher.Errors:
+			case err = <-watcher.Errors:
 				log.Println("error:", err)
 			}
 		}

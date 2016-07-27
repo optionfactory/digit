@@ -3,9 +3,11 @@ package git
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 type Commit struct {
@@ -46,16 +48,42 @@ func New(name string, repositoryDir string) *Repo {
 	}
 }
 
-func (self *Repo) Update() *Repo {
-	self.Branches = self.localBranches()
-	self.RemoteBranches = self.remoteBranches()
-	self.Stash = self.stashContent()
-	self.Tags = self.tags()
-	self.Head = self.headCommit()
-	self.Commits = self.reachables()
-	self.Commits = append(self.Commits, self.unreachables()...)
-	self.Status = self.status()
-	return self
+func (self *Repo) Update() error {
+	var err error
+	self.Branches, err = self.localBranches()
+	if err != nil {
+		return err
+	}
+	self.RemoteBranches, err = self.remoteBranches()
+	if err != nil {
+		return err
+	}
+	self.Stash, err = self.stashContent()
+	if err != nil {
+		return err
+	}
+	self.Tags, err = self.tags()
+	if err != nil {
+		return err
+	}
+	self.Head, err = self.headCommit()
+	if err != nil {
+		return err
+	}
+	self.Commits, err = self.reachables()
+	if err != nil {
+		return err
+	}
+	unreachables, err := self.unreachables()
+	if err != nil {
+		return err
+	}
+	self.Commits = append(self.Commits, unreachables...)
+	if err != nil {
+		return err
+	}
+	self.Status, err = self.status()
+	return err
 }
 
 type filter func(line string) bool
@@ -69,19 +97,26 @@ type Ref struct {
 	Hash string `json:"commitId"`
 }
 
-func (self *Repo) readLines(opts []string, filter filter) ([]string, error) {
+type CmdError struct {
+	CommandRan bool
+	ExitStatus int
+	Stderr     []string
+	Cause      error
+}
+
+func (self *Repo) readLines(opts []string, filter filter) ([]string, *CmdError) {
 	args := []string{"-C", self.Path}
 	args = append(args, opts...)
 	cmd := exec.Command("git", args...)
 	stderr, _ := cmd.StderrPipe()
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		log.Printf("Failed to get stdout for '%v': %s\n", cmd, err)
+		return nil, &CmdError{Cause: err}
 	}
 	if err := cmd.Start(); err != nil {
-		log.Println(err)
-		return nil, err
+		log.Printf("Failed to run command '%v': %s\n", cmd, err)
+		return nil, &CmdError{Cause: err}
 	}
 	result := make([]string, 0)
 	scanner := bufio.NewScanner(stdout)
@@ -94,12 +129,30 @@ func (self *Repo) readLines(opts []string, filter filter) ([]string, error) {
 			result = append(result, scanner.Text())
 		}
 	}
+	stderrLines := []string{}
 	sscanner := bufio.NewScanner(stderr)
 	for sscanner.Scan() {
-		log.Println(sscanner.Text())
+		stderrLines = append(stderrLines, sscanner.Text())
 	}
 	if err := cmd.Wait(); err != nil {
-		log.Println(err)
+		exiterr, ok := err.(*exec.ExitError)
+		if !ok {
+			return nil, &CmdError{
+				CommandRan: true,
+				Stderr:     stderrLines,
+				Cause:      errors.New(fmt.Sprintf("executing %v got %s, %+v", cmd, err, stderrLines)),
+			}
+		}
+		status, ok := exiterr.Sys().(syscall.WaitStatus)
+		if !ok {
+			panic("unsupported platform")
+		}
+		return nil, &CmdError{
+			CommandRan: true,
+			ExitStatus: status.ExitStatus(),
+			Stderr:     stderrLines,
+			Cause:      errors.New(fmt.Sprintf("executing %v got %s, %+v", cmd, err, stderrLines)),
+		}
 	}
 	return result, nil
 }
@@ -107,9 +160,9 @@ func (self *Repo) readLines(opts []string, filter filter) ([]string, error) {
 func (self *Repo) readReferences(opts []string, filter filter) ([]Ref, error) {
 	fullOpts := append([]string{"show-ref"}, opts...)
 	result := make([]Ref, 0)
-	lines, err := self.readLines(fullOpts, filter)
-	if err != nil {
-		return result, err
+	lines, cmderr := self.readLines(fullOpts, filter)
+	if cmderr != nil && cmderr.ExitStatus != 1 {
+		return nil, cmderr.Cause
 	}
 	for _, line := range lines {
 		ref, err := parseRef(line)
@@ -121,9 +174,9 @@ func (self *Repo) readReferences(opts []string, filter filter) ([]Ref, error) {
 }
 
 func (self *Repo) readHEADRef() (string, error) {
-	lines, err := self.readLines([]string{"symbolic-ref", "--short", "HEAD"}, always)
-	if err != nil {
-		return "", err
+	lines, cmderr := self.readLines([]string{"symbolic-ref", "--short", "HEAD"}, always)
+	if cmderr != nil && cmderr.ExitStatus != 1 {
+		return "", cmderr.Cause
 	}
 	for _, line := range lines {
 		if len(line) > 0 {
@@ -147,41 +200,25 @@ func parseRef(text string) (Ref, error) {
 	}, nil
 }
 
-func (self *Repo) tags() []Ref {
-	res, err := self.readReferences([]string{"--tags", "-d"}, always)
-	if err != nil {
-		panic(err)
-	}
-	return res
+func (self *Repo) tags() ([]Ref, error) {
+	return self.readReferences([]string{"--tags", "-d"}, always)
 }
 
-func (self *Repo) localBranches() []Ref {
-	res, err := self.readReferences([]string{"--heads"}, always)
-	if err != nil {
-		panic(err)
-	}
-	return res
+func (self *Repo) localBranches() ([]Ref, error) {
+	return self.readReferences([]string{"--heads"}, always)
 
 }
 
-func (self *Repo) remoteBranches() []Ref {
-	res, err := self.readReferences([]string{}, func(line string) bool {
+func (self *Repo) remoteBranches() ([]Ref, error) {
+	return self.readReferences([]string{}, func(line string) bool {
 		return strings.Contains(line, "refs/remotes/")
 	})
-	if err != nil {
-		panic(err)
-	}
-	return res
 }
 
-func (self *Repo) stashContent() []Ref {
-	res, err := self.readReferences([]string{}, func(line string) bool {
+func (self *Repo) stashContent() ([]Ref, error) {
+	return self.readReferences([]string{}, func(line string) bool {
 		return strings.Contains(line, "refs/stash/")
 	})
-	if err != nil {
-		panic(err)
-	}
-	return res
 }
 
 type HeadRef struct {
@@ -189,63 +226,66 @@ type HeadRef struct {
 	CommitId string `json:"commitId"`
 }
 
-func (self *Repo) headCommit() HeadRef {
+func (self *Repo) headCommit() (HeadRef, error) {
 	refName, err := self.readHEADRef()
 	if err != nil {
-		panic(err)
+		return HeadRef{}, err
 	}
 	if len(refName) > 0 {
 		return HeadRef{
 			BranchId: refName,
-		}
+		}, nil
 	}
-	refs, err2 := self.readReferences([]string{"--head"}, func(line string) bool {
+	refs, err := self.readReferences([]string{"--head"}, func(line string) bool {
 		return strings.Contains(line, " HEAD")
 	})
-	if err2 != nil {
-		panic(err)
+	if err != nil {
+		return HeadRef{}, err
 	}
 	return HeadRef{
 		CommitId: refs[0].Hash,
-	}
+	}, nil
 }
 
-func (self *Repo) reachables() []Commit {
-	lines, err := self.readLines([]string{"log", "--pretty=%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%s", "--reverse", "--all"}, always)
-	if err != nil {
-		panic(err)
+func (self *Repo) reachables() ([]Commit, error) {
+	lines, cmderr := self.readLines([]string{"log", "--pretty=%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%s", "--reverse", "--all"}, always)
+	if cmderr != nil {
+		return nil, cmderr.Cause
 	}
 	commits := make([]Commit, 0, len(lines))
 	for _, line := range lines {
 		commits = append(commits, parseCommit(line, false))
 	}
-	return commits
+	return commits, nil
 }
 
-func (self *Repo) unreachables() []Commit {
-	idLines, err := self.readLines([]string{"fsck", "--unreachable", "--no-reflogs", "--no-progress"}, func(line string) bool {
+func (self *Repo) unreachables() ([]Commit, error) {
+	idLines, cmderr := self.readLines([]string{"fsck", "--unreachable", "--no-reflogs", "--no-progress"}, func(line string) bool {
 		return strings.Contains(line, "commit")
 	})
-	if err != nil {
-		panic(err)
+	if cmderr != nil {
+		return nil, cmderr.Cause
 	}
 	unreacheableIds := make([]string, 0, len(idLines))
 	for _, line := range idLines {
 		unreacheableIds = append(unreacheableIds, strings.SplitN(line, " ", 3)[2])
 	}
 	if len(unreacheableIds) == 0 {
-		return nil
+		return nil, nil
 	}
 	revListArgs := []string{"rev-list", "--no-walk", "--pretty=%H|%P|%an|%ae|%ad|%cn|%ce|%cd|%s"}
 	revListArgs = append(revListArgs, unreacheableIds...)
-	lines, err := self.readLines(revListArgs, func(line string) bool {
+	lines, cmderr := self.readLines(revListArgs, func(line string) bool {
 		return !strings.HasPrefix(line, "commit")
 	})
+	if cmderr != nil {
+		return nil, cmderr.Cause
+	}
 	commits := make([]Commit, 0, len(lines))
 	for _, line := range lines {
 		commits = append(commits, parseCommit(line, true))
 	}
-	return commits
+	return commits, nil
 }
 
 func parseCommit(line string, unreachable bool) Commit {
@@ -268,10 +308,10 @@ func parseCommit(line string, unreachable bool) Commit {
 	}
 }
 
-func (self *Repo) status() []FileStatus {
-	lines, err := self.readLines([]string{"status", "--porcelain"}, always)
-	if err != nil {
-		panic(err)
+func (self *Repo) status() ([]FileStatus, error) {
+	lines, cmderr := self.readLines([]string{"status", "--porcelain"}, always)
+	if cmderr != nil {
+		return nil, cmderr.Cause
 	}
 	statuses := make([]FileStatus, 0, len(lines))
 	for _, line := range lines {
@@ -284,5 +324,5 @@ func (self *Repo) status() []FileStatus {
 			StagingToCommit:      stagingToCommit,
 		})
 	}
-	return statuses
+	return statuses, nil
 }
