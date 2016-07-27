@@ -3,7 +3,6 @@ package main
 //go:generate go-bindata -pkg assets -o assets/assets.go --prefix "embedded-data/" embedded-data/...
 
 import (
-	// "encoding/json"
 	"flag"
 	"fmt"
 	"github.com/optionfactory/digit/git"

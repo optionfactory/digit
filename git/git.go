@@ -309,7 +309,7 @@ func parseCommit(line string, unreachable bool) Commit {
 }
 
 func (self *Repo) status() ([]FileStatus, error) {
-	lines, cmderr := self.readLines([]string{"status", "--porcelain"}, always)
+	lines, cmderr := self.readLines([]string{"status", "--porcelain", "-uall"}, always)
 	if cmderr != nil {
 		return nil, cmderr.Cause
 	}
