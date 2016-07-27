@@ -160,12 +160,12 @@ develop-$(PROJECT)-%: FORCE
 	-@GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go vet -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...
 	@#
 	@echo "* running tests: DEVELOP_SKIP_TESTS=${DEVELOP_SKIP_TESTS}"
-	@if [ "true" != "${DEVELOP_SKIP_TESTS}" ] ; then \
+	-@if [ "true" != "${DEVELOP_SKIP_TESTS}" ] ; then \
 		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go test -a $(TESTING_OPTIONS) -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)" ./...; \
 	fi
 	@#	
 	@echo "* compiling (go) DEVELOP_SKIP_BUILD=${DEVELOP_SKIP_BUILD}"
-	@if [ "true" != "${DEVELOP_SKIP_BUILD}" ] ; then \
+	-@if [ "true" != "${DEVELOP_SKIP_BUILD}" ] ; then \
 		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go install -a -tags netgo -installsuffix netgo -ldflags "-X main.version=$(VERSION)"; \
 	fi
 	@#
