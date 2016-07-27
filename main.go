@@ -45,7 +45,7 @@ func main() {
 		solicitationsMap[r.Name] = watch.Watch(r, &updates)
 	}
 
-	bindAddress := "0.0.0.0:9000"
-	fmt.Fprintf(os.Stderr, "Listening on %v\n", bindAddress)
+	bindAddress := "localhost:9000"
+	fmt.Fprintf(os.Stderr, "Listening on http://%v\n", bindAddress)
 	http.Listen(bindAddress, target_repos, &updates, solicitationsMap)
 }

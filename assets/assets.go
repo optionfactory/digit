@@ -109,7 +109,7 @@ func cssDroidsansWoff2() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "css/DroidSans.woff2", size: 21448, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "css/DroidSans.woff2", size: 21448, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -129,7 +129,7 @@ func cssDigitCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "css/digit.css", size: 3999, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "css/digit.css", size: 3999, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -149,7 +149,7 @@ func faviconIco() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "favicon.ico", size: 15086, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "favicon.ico", size: 15086, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -169,7 +169,7 @@ func graphAlgorithmGit() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/.git", size: 57, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/.git", size: 57, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -189,7 +189,7 @@ func graphAlgorithmCoordinatescalculatorJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/CoordinatesCalculator.js", size: 16611, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/CoordinatesCalculator.js", size: 16611, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -209,7 +209,7 @@ func graphAlgorithmLicenseMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/LICENSE.md", size: 1355, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/LICENSE.md", size: 1355, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -229,7 +229,7 @@ func graphAlgorithmReadmeMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/README.md", size: 42, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/README.md", size: 42, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -249,7 +249,7 @@ func graphAlgorithmDemoDemoCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/demo/demo.css", size: 609, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/demo/demo.css", size: 609, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -269,7 +269,7 @@ func graphAlgorithmDemoDemoHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/demo/demo.html", size: 937, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/demo/demo.html", size: 937, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -289,7 +289,7 @@ func graphAlgorithmDemoDemoJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/demo/demo.js", size: 8546, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/demo/demo.js", size: 8546, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -309,7 +309,7 @@ func graphAlgorithmDemoResetPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/demo/reset.png", size: 566, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/demo/reset.png", size: 566, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -329,7 +329,7 @@ func graphAlgorithmDemodataJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/demoData.js", size: 12346, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/demoData.js", size: 12346, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -349,7 +349,7 @@ func graphAlgorithmGraphpathsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/graphPaths.js", size: 10484, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/graphPaths.js", size: 10484, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -369,7 +369,7 @@ func graphAlgorithmTestsCoordinatescalculatortestsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/tests/CoordinatesCalculatorTests.js", size: 117643, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/tests/CoordinatesCalculatorTests.js", size: 117643, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -389,7 +389,7 @@ func graphAlgorithmTestsGraphpathstestJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/tests/graphPathsTest.js", size: 4129, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/tests/graphPathsTest.js", size: 4129, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -409,7 +409,7 @@ func graphAlgorithmTestsIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/tests/index.html", size: 550, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/tests/index.html", size: 550, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -429,7 +429,7 @@ func graphAlgorithmTestsQunit1220Css() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/tests/qunit-1.22.0.css", size: 5399, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/tests/qunit-1.22.0.css", size: 5399, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -449,7 +449,7 @@ func graphAlgorithmTestsQunit1220Js() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "graph-algorithm/tests/qunit-1.22.0.js", size: 112973, mode: os.FileMode(436), modTime: time.Unix(1469539674, 0)}
+	info := bindataFileInfo{name: "graph-algorithm/tests/qunit-1.22.0.js", size: 112973, mode: os.FileMode(436), modTime: time.Unix(1469612736, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -469,7 +469,7 @@ func imgHeadshotPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "img/Headshot.png", size: 1291, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "img/Headshot.png", size: 1291, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -489,7 +489,7 @@ func imgResetPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "img/reset.png", size: 566, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "img/reset.png", size: 566, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -509,7 +509,7 @@ func imgReset_button_iconPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "img/reset_button_icon.png", size: 2786, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "img/reset_button_icon.png", size: 2786, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -529,7 +529,7 @@ func indexGotemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "index.gotemplate", size: 1953, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "index.gotemplate", size: 1953, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -549,12 +549,12 @@ func jsD3MinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/d3.min.js", size: 151665, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "js/d3.min.js", size: 151665, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _jsDigitJs = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x7c\x52\xb1\x8e\xdb\x30\x0c\xdd\xf3\x15\x84\x3b\x44\x46\x02\xc5\x68\xa7\x26\x30\x3a\x14\x5d\x3a\xb4\x40\xd3\xbb\x9b\x15\x89\x4e\x8c\x53\x44\x43\x94\xe3\xe1\xe0\x7f\x3f\x48\xb1\x1d\x27\xc0\x9d\x26\x91\x8f\x7c\xef\x91\x52\xd5\x3a\x1d\x6a\x72\xa0\xc9\x39\xd4\x41\x38\x75\xc6\x1c\xde\x16\x00\x00\x17\xe5\x81\x49\xbf\x62\x80\x12\x1c\x76\xf0\x82\x87\x7d\x8a\x45\xd6\xf1\x76\xb3\xb1\xa4\x95\x3d\x11\x87\xed\xf7\xa2\x28\x36\x1d\xff\x88\xed\x65\x06\x2b\x48\x3c\xbb\x44\x73\xa5\x90\xe4\xa8\x41\x07\x25\x8c\x9a\x62\xd4\x19\xb5\x3c\x36\xf4\x5c\x63\x87\x7e\xd0\xfb\x37\x25\xc4\xc0\x15\xcf\xad\x4c\x7a\x74\x06\xbd\x30\xdf\x24\xa3\x8d\xf6\xb3\x2f\x93\xf8\xac\x23\x92\x57\xb5\xe7\xf0\xd4\x18\x15\x10\x4a\x08\xbe\xc5\x1b\x3e\x39\x3c\x23\xb3\x3a\xe2\xdc\x24\x5e\xc2\xdc\xe7\x83\x81\x36\x11\x8a\xdf\xfb\xbf\x7f\x64\xa3\x3c\x63\xac\x97\x46\x05\x95\xaf\xe7\x92\x33\x33\xf1\xdc\x9b\xa9\x94\xe5\x99\x9b\xfe\x7a\xed\x1f\xb6\x87\xde\x93\xff\x68\x7d\x43\x95\xb6\xc4\x38\xee\xaa\xbf\xef\x4f\xd8\x27\x93\x69\x72\x4c\x16\xa5\xa5\x63\x7c\xde\xf1\x47\xa4\xcf\x11\x5b\x0d\x74\x75\x38\x81\x26\x83\xb0\x8c\x5b\x8e\x93\xa6\x68\x05\xd9\x12\x94\x33\xe0\x51\x31\xb9\x1b\x3a\xc4\x09\x17\xda\xa2\x72\xe5\x84\x75\x8a\x7f\xc6\x4c\x42\xf3\x6c\xb6\x20\xc6\xf0\xbf\x3e\x23\xb5\x41\x0c\x1e\xe4\xa1\x76\x46\xb8\xd6\xda\xf5\xf5\x6d\xd7\xf0\xb5\x28\x8a\x69\xce\x7e\xb7\x88\x69\x96\x15\xf9\x5f\x4a\x9f\xc6\xbe\x7c\xb7\x78\x0f\x00\x00\xff\xff\x8e\x6e\x11\xaa\xe1\x02\x00\x00")
+var _jsDigitJs = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x7c\x92\xbf\x8e\xdb\x30\x0c\xc6\xf7\x3c\x05\xa1\x0e\x27\x23\x81\x12\xb4\x63\x60\x74\x28\xba\x74\x68\x81\x5e\xff\x6c\x05\x74\x12\x93\x08\x95\x49\x43\x94\xcf\x43\x91\x77\x2f\xa4\xd8\x8e\xaf\x40\xcf\x8b\x2d\x7e\x24\xbf\x1f\x69\x9d\x06\x72\x39\x30\x81\x63\x22\x74\x59\x93\xed\xb0\x81\x3f\x1b\x00\x80\x67\x9b\x40\xd8\xfd\xc6\x0c\x2d\x10\x8e\xf0\x13\x9f\x1e\xeb\x59\x7b\x76\x43\x87\x94\x4d\x64\x67\x4b\x03\xc3\x29\x9c\x03\x99\x84\x7d\xb4\x0e\xf5\xfe\xd7\x25\xe7\x7e\xbf\x03\x35\x8a\x6a\x60\x0b\x6a\x3f\xca\xfb\xd2\xbd\x55\xb0\x85\x6a\x53\x4d\x6e\x06\x86\x89\x7b\x24\x68\x61\x26\xd2\x33\xc5\x4c\x92\xb0\xe7\x1f\x01\x47\x4c\x13\xcd\xd7\x25\xa0\x9b\xe3\x92\x7a\x4f\x33\x09\xc9\x63\xd2\xfe\x9d\x11\x8c\x65\x38\xf5\x66\xf1\x5e\x55\x94\xe6\xa7\x90\x24\x7f\xef\xbd\xcd\x08\x2d\xe4\x34\xe0\x5d\x5f\x08\x3b\x14\xb1\x67\x5c\x43\xe2\x73\x5e\x73\xfe\x03\x30\xd4\x86\xfa\xd3\xe3\x97\xcf\xa6\xb7\x49\xb0\xe4\x1b\x6f\xb3\x6d\x76\x6b\xcb\x15\x4c\x79\x5e\xc2\x9c\x6c\x94\x15\xcd\xf5\xf6\x39\xbd\x16\x36\x4c\x89\xd3\xff\xd6\x37\x65\xb9\xc8\x82\xf3\xae\xae\x2f\xeb\xab\xf6\xca\x64\x8e\x49\x38\xa2\x89\x7c\xd6\x6a\x94\xf9\xbe\xd4\xab\x53\x4a\x3d\x8c\x21\x5f\xc0\xb1\x47\x78\x28\x5b\x2e\x93\xd6\xd3\x16\xd4\x03\x58\xf2\x90\xd0\x0a\xd3\x5d\x9d\xce\x55\xd7\x2e\xa2\xa5\x76\xd1\x46\x2b\x1f\x4a\xa4\xaa\x8d\x5a\x2d\x48\x30\x7f\x0b\x1d\xf2\x90\xf5\xc4\x60\x9e\x02\x79\x4d\x43\x8c\xbb\xdb\xbf\xdd\xc1\xdb\xc3\xe1\xb0\xcc\x79\x3d\x6e\x4a\x58\xcc\x89\xd3\x47\xeb\x2e\x73\x5d\x73\xdc\xfc\x0d\x00\x00\xff\xff\x3b\xe2\x60\x56\xff\x02\x00\x00")
 
 func jsDigitJsBytes() ([]byte, error) {
 	return bindataRead(
@@ -569,7 +569,7 @@ func jsDigitJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/digit.js", size: 737, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "js/digit.js", size: 767, mode: os.FileMode(436), modTime: time.Unix(1469614659, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -589,7 +589,7 @@ func jsJsoverridesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/jsOverrides.js", size: 1440, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "js/jsOverrides.js", size: 1440, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -609,7 +609,7 @@ func jsRepoviewerJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "js/repoViewer.js", size: 18719, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "js/repoViewer.js", size: 18719, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -629,7 +629,7 @@ func libD3V3Js() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lib/d3.v3.js", size: 337943, mode: os.FileMode(436), modTime: time.Unix(1469539620, 0)}
+	info := bindataFileInfo{name: "lib/d3.v3.js", size: 337943, mode: os.FileMode(436), modTime: time.Unix(1469602080, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -1,5 +1,5 @@
 function connect(name) {
-    var socket = new WebSocket("ws://localhost:9000/ws?name=" + name);
+    var socket = new WebSocket(document.location.origin.replace(/^http/, "ws") + "/ws?name=" + name)
     socket.onopen = function() {
         var repoViewer = new RepoViewer();
         repoViewer.render(d3.select("#" + name));

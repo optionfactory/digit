@@ -67,12 +67,15 @@ func Listen(bindAddress string, target_repos map[string]*git.Repo, updates *broa
 	templateText := assets.MustAsset("index.gotemplate")
 	var indexTemplate = template.Must(template.New("index.gotemplate").Parse(string(templateText)))
 
-	http.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
+	rootHandler := func(w http.ResponseWriter, r *http.Request) {
 		err := indexTemplate.Execute(w, repo_names)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	})
+	}
+
+	http.HandleFunc("/index.htm", rootHandler)
+	http.HandleFunc("/index.html", rootHandler)
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		repoName := r.FormValue("name")
@@ -85,7 +88,14 @@ func Listen(bindAddress string, target_repos map[string]*git.Repo, updates *broa
 
 		wsHandler(merge(updateListener.Ch, solicitations), repoName, w, r)
 	})
-	http.Handle("/", http.FileServer(&assetfs.AssetFS{Asset: assets.Asset, AssetDir: assets.AssetDir, AssetInfo: assets.AssetInfo, Prefix: ""}))
+	fs := http.FileServer(&assetfs.AssetFS{Asset: assets.Asset, AssetDir: assets.AssetDir, AssetInfo: assets.AssetInfo, Prefix: ""})
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			rootHandler(w, r)
+			return
+		}
+		fs.ServeHTTP(w, r)
+	})
 
 	if err := http.ListenAndServe(bindAddress, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
