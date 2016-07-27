@@ -27,10 +27,10 @@ The build system relies on docker and GNU Make.
 
 # Supported platforms
 
-* Linux (tested)
-* OS X (tested)
-* Windows (test in progress)
-* Others: possibly
+* Linux [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-linux-amd64) [386](//github.com/optionfactory/digit/releases/download/1.0/digit-linux-386) (tested)
+* Windows [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-windows-amd64.exe) [386](//github.com/optionfactory/digit/releases/download/1.0/digit-windows-386.exe) (test in progress)
+* OS X [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-darwin-amd64) (tested)
+* Others: possibly, let us know: see [release](//github.com/optionfactory/digit/releases/tag/1.0)
 
 ## Authors
 
