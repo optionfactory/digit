@@ -4,6 +4,7 @@ package main
 
 import (
 	// "encoding/json"
+	"flag"
 	"fmt"
 	"github.com/optionfactory/digit/git"
 	"github.com/optionfactory/digit/http"
@@ -26,16 +27,28 @@ func parseRepo(name string, path string) *git.Repo {
 
 func main() {
 	fmt.Fprintf(os.Stderr, "starting version %v\n", version)
-	if len(os.Args) < 2 || len(os.Args) > 3 {
-		fmt.Fprintf(os.Stderr, "Usage: %s local_repo [remote_repo]\n", os.Args[0])
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] local_repo [remote_repo]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+	}
+
+	bindAddress := flag.String("bind-to", "localhost:9000", "Address:Port to bind to")
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) < 1 || len(args) > 2 {
+		flag.Usage()
 		os.Exit(1)
 	}
 
 	target_repos := make(map[string]*git.Repo, 0)
 
-	target_repos["local"] = parseRepo("local", os.Args[1])
-	if len(os.Args) > 2 {
-		target_repos["remote"] = parseRepo("remote", os.Args[2])
+	target_repos["local"] = parseRepo("local", args[0])
+	if len(args) > 1 {
+		target_repos["remote"] = parseRepo("remote", args[1])
 	}
 
 	var updates broadcast.Broadcaster
@@ -45,7 +58,6 @@ func main() {
 		solicitationsMap[r.Name] = watch.Watch(r, &updates)
 	}
 
-	bindAddress := "localhost:9000"
-	fmt.Fprintf(os.Stderr, "Listening on http://%v\n", bindAddress)
-	http.Listen(bindAddress, target_repos, &updates, solicitationsMap)
+	fmt.Fprintf(os.Stderr, "Listening on http://%v\n", *bindAddress)
+	http.Listen(*bindAddress, target_repos, &updates, solicitationsMap)
 }
