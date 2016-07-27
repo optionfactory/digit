@@ -12,6 +12,13 @@ A visualization tool to learn git, as used in our wonderful workshop (http://www
 * display current repo status (as in "output of `git status`")
 * visualizes node ancestry (for reachability)
 
+## Binary downloads
+
+* Linux [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-linux-amd64) [386](//github.com/optionfactory/digit/releases/download/1.0/digit-linux-386) (tested)
+* Windows [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-windows-amd64.exe) [386](//github.com/optionfactory/digit/releases/download/1.0/digit-windows-386.exe) (test in progress)
+* OS X [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-darwin-amd64) (tested)
+* Others: possibly, let us know: see [release](//github.com/optionfactory/digit/releases/tag/1.0)
+
 ### Main interface 
 ![Main interface](screenshots/cover.png?raw=true "Main interface")
 ### Reachability and commit metadata
@@ -43,17 +50,10 @@ The build system relies on docker and GNU Make.
 * just a learning aid
 * not meant to scale (tested with repos with a couple hunder commits)
 
-## Supported platforms
-
-* Linux [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-linux-amd64) [386](//github.com/optionfactory/digit/releases/download/1.0/digit-linux-386) (tested)
-* Windows [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-windows-amd64.exe) [386](//github.com/optionfactory/digit/releases/download/1.0/digit-windows-386.exe) (test in progress)
-* OS X [amd64](//github.com/optionfactory/digit/releases/download/1.0/digit-darwin-amd64) (tested)
-* Others: possibly, let us know: see [release](//github.com/optionfactory/digit/releases/tag/1.0)
-
 ## Authors
 
 * Francesco Degrassi
 * Davide Salvador
 
 ## Thanks
-To Wei Wang: several ideas taken from https://github.com/onlywei/explain-git-with-d3
+To Wei Wang: several ideas taken from [Explain Git With D3](https://github.com/onlywei/explain-git-with-d3)
