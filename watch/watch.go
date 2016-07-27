@@ -6,10 +6,16 @@ import (
 	"github.com/tjgq/broadcast"
 	"gopkg.in/fsnotify.v1"
 	"log"
-	"path/filepath"
+	"os"
 	"strings"
 	"time"
 )
+
+var gitLockSuffix string = string(os.PathSeparator) + "index.lock"
+
+func isGitLock(filePath string) bool {
+	return strings.Contains(filePath, ".git") && strings.HasSuffix(filePath, gitLockSuffix)
+}
 
 func Watch(r *git.Repo, updates *broadcast.Broadcaster) chan chan interface{} {
 	if err := r.Update(); err != nil {
@@ -26,13 +32,12 @@ func Watch(r *git.Repo, updates *broadcast.Broadcaster) chan chan interface{} {
 	go func() {
 		coalescing := []fsnotify.Event{}
 		timer := make(<-chan time.Time)
-		gitLock := filepath.Join(".git", "index.lock")
 		for {
 			select {
 			case replyChan := <-solicitations:
 				replyChan <- *r
 			case event := <-watcher.Events:
-				if event.Op&fsnotify.Chmod == fsnotify.Chmod || strings.HasSuffix(event.Name, gitLock) {
+				if event.Op&fsnotify.Chmod == fsnotify.Chmod || isGitLock(event.Name) {
 					continue
 				}
 				if len(coalescing) == 0 {
