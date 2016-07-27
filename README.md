@@ -2,9 +2,9 @@
 A visualization tool to learn git, as used in our wonderful workshop (http://www.optionfactory.net/courses/details/Git/).
 
 ## Usage
-'''
+```
 digit [--bind-to <bind-address>:<bind-port>] local_repo_path [origin_repo_path]
-'''
+```
 
 and point your browser to http://localhost:9000 (or any other address specified in --bind-to)
 
@@ -17,8 +17,8 @@ This repo uses a submodule in embedded_data/graph-algorithm.
 
 The build system relies on docker and GNU Make.
 
-make local: builds for the local os/arch
-make all: builds for all architectures
+* make local: builds for the local os/arch
+* make all: builds for all architectures
 
 ## Known Limitations
 
