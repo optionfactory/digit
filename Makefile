@@ -4,7 +4,7 @@ SCM_TEAM:=optionfactory
 GOLANG_IMAGE:=golang:1.7
 UID=$(shell id -u)
 GID=$(shell id -g)
-VERSION:=$(shell git describe --tags --always 2>/dev/null||echo "untracked")
+VERSION:=$(shell git describe --tags --always --dirty 2>/dev/null||echo "untracked")
 SHELL = /bin/bash
 TOOLS_TO_INSTALL=github.com/jteeuwen/go-bindata 
 #set to true to skip tests execution 
