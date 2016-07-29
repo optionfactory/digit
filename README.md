@@ -1,5 +1,11 @@
 # digit - learn git by visualizing it
-A visualization tool to learn git, as used in our wonderful workshop (http://www.optionfactory.net/courses/details/Git/).
+
+Digit shows a realtime visual representation of a git repo structure, making it easier to understand how git works and what is the effect of each and every git command you run.
+
+Digit is meant to be a learning tool, developed for our mid-level git workshop (http://www.optionfactory.net/courses/details/Git/). As such, it is not designed to scale to large repositories.
+
+## How does it look like
+![Main interface](screenshots/cover.png?raw=true "Main interface")
 
 ## Features
 
@@ -20,8 +26,7 @@ A visualization tool to learn git, as used in our wonderful workshop (http://www
 * OS X [amd64](//github.com/optionfactory/digit/releases/download/1.1/digit-darwin-amd64) (tested)
 * Others: possibly, let us know: see [release](//github.com/optionfactory/digit/releases/tag/1.1)
 
-### Main interface 
-![Main interface](screenshots/cover.png?raw=true "Main interface")
+## More screenshots
 ### Reachability and commit metadata
 ![Reachability and commit metadata](screenshots/reachability_and_commit_details.png?raw=true "Reachability and commit metadata")
 ### Local and remote repo
