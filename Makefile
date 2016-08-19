@@ -53,13 +53,14 @@ else
 	endif
 endif
 
+ROOTDIR=$(shell pwd)
 
 local: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
 	@docker run --rm=true \
-		-v ${PWD}:/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
-		-v ${PWD}/Makefile:/go/Makefile \
-		-v ${PWD}/bin:/go/bin \
+		-v $(ROOTDIR):/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
+		-v $(ROOTDIR)/Makefile:/go/Makefile \
+		-v $(ROOTDIR)/bin:/go/bin \
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		$(GOLANG_IMAGE) \
 		make -f /go/Makefile $(PROJECT)-$(BUILD_OS)-$(BUILD_ARCH) UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS}
@@ -67,9 +68,9 @@ local: FORCE
 develop: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
 	@docker run --rm=true \
-		-v ${PWD}:/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
-		-v ${PWD}/Makefile:/go/Makefile \
-		-v ${PWD}/bin:/go/bin \
+		-v $(ROOTDIR):/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
+		-v $(ROOTDIR)/Makefile:/go/Makefile \
+		-v $(ROOTDIR)/bin:/go/bin \
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		-ti \
 		$(GOLANG_IMAGE) \
@@ -80,9 +81,9 @@ develop: FORCE
 all: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
 	@docker run --rm=true \
-		-v ${PWD}:/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
-		-v ${PWD}/Makefile:/go/Makefile \
-		-v ${PWD}/bin:/go/bin \
+		-v $(ROOTDIR):/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
+		-v $(ROOTDIR)/Makefile:/go/Makefile \
+		-v $(ROOTDIR)/bin:/go/bin \
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		$(GOLANG_IMAGE) \
 		make -f /go/Makefile build UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS}
