@@ -20,20 +20,20 @@ DEVELOP_SKIP_BUILD=false
 DEVELOP_AFTER_BUILD=
 
 ifeq ($(OS),Windows_NT)
-	BUILD_OS = windows
+	override BUILD_OS = windows
 	ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-		BUILD_ARCH = amd64
+		override BUILD_ARCH = amd64
 	endif
 	ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-		BUILD_ARCH = 386
+		override BUILD_ARCH = 386
 	endif
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)
-		BUILD_OS = linux
+		override BUILD_OS = linux
 	endif
 	ifeq ($(UNAME_S),Darwin)
-		BUILD_OS = darwin
+		override BUILD_OS = darwin
 	endif
 
 	ifneq ("$(shell which arch)","")
@@ -43,13 +43,13 @@ else
 	endif
 
 	ifeq ($(UNAME_P),x86_64)
-		BUILD_ARCH = amd64
+		override BUILD_ARCH = amd64
 	endif
 	ifneq ($(filter %86,$(UNAME_P)),)
-		BUILD_ARCH = 386
+		override BUILD_ARCH = 386
 	endif
 	ifneq ($(filter arm%,$(UNAME_P)),)
-		BUILD_ARCH = arm
+		override BUILD_ARCH = arm
 	endif
 endif
 
