@@ -25,7 +25,11 @@ ifeq ($(OS),Windows_NT)
 		override BUILD_ARCH = amd64
 	endif
 	ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-		override BUILD_ARCH = 386
+		ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
+			override BUILD_ARCH = amd64
+		else
+			override BUILD_ARCH = 386
+		endif
 	endif
 else
 	UNAME_S := $(shell uname -s)
