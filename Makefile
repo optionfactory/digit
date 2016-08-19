@@ -20,20 +20,24 @@ DEVELOP_SKIP_BUILD=false
 DEVELOP_AFTER_BUILD=
 
 ifeq ($(OS),Windows_NT)
-	BUILD_OS = windows
+	override BUILD_OS = windows
 	ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-		BUILD_ARCH = amd64
+		override BUILD_ARCH = amd64
 	endif
 	ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-		BUILD_ARCH = 386
+		ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
+			override BUILD_ARCH = amd64
+		else
+			override BUILD_ARCH = 386
+		endif
 	endif
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)
-		BUILD_OS = linux
+		override BUILD_OS = linux
 	endif
 	ifeq ($(UNAME_S),Darwin)
-		BUILD_OS = darwin
+		override BUILD_OS = darwin
 	endif
 
 	ifneq ("$(shell which arch)","")
@@ -43,23 +47,24 @@ else
 	endif
 
 	ifeq ($(UNAME_P),x86_64)
-		BUILD_ARCH = amd64
+		override BUILD_ARCH = amd64
 	endif
 	ifneq ($(filter %86,$(UNAME_P)),)
-		BUILD_ARCH = 386
+		override BUILD_ARCH = 386
 	endif
 	ifneq ($(filter arm%,$(UNAME_P)),)
-		BUILD_ARCH = arm
+		override BUILD_ARCH = arm
 	endif
 endif
 
+ROOTDIR=$(shell pwd)
 
 local: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
 	@docker run --rm=true \
-		-v ${PWD}:/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
-		-v ${PWD}/Makefile:/go/Makefile \
-		-v ${PWD}/bin:/go/bin \
+		-v $(ROOTDIR):/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
+		-v $(ROOTDIR)/Makefile:/go/Makefile \
+		-v $(ROOTDIR)/bin:/go/bin \
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		$(GOLANG_IMAGE) \
 		make -f /go/Makefile $(PROJECT)-$(BUILD_OS)-$(BUILD_ARCH) UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS}
@@ -67,9 +72,9 @@ local: FORCE
 develop: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
 	@docker run --rm=true \
-		-v ${PWD}:/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
-		-v ${PWD}/Makefile:/go/Makefile \
-		-v ${PWD}/bin:/go/bin \
+		-v $(ROOTDIR):/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
+		-v $(ROOTDIR)/Makefile:/go/Makefile \
+		-v $(ROOTDIR)/bin:/go/bin \
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		-ti \
 		$(GOLANG_IMAGE) \
@@ -80,9 +85,9 @@ develop: FORCE
 all: FORCE
 	@echo spawning docker container $(GOLANG_IMAGE)
 	@docker run --rm=true \
-		-v ${PWD}:/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
-		-v ${PWD}/Makefile:/go/Makefile \
-		-v ${PWD}/bin:/go/bin \
+		-v $(ROOTDIR):/go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
+		-v $(ROOTDIR)/Makefile:/go/Makefile \
+		-v $(ROOTDIR)/bin:/go/bin \
 		-w /go/src/$(SCM_SERVICE)/$(SCM_TEAM)/$(PROJECT)/ \
 		$(GOLANG_IMAGE) \
 		make -f /go/Makefile build UID=${UID} GID=${GID} VERSION=${VERSION} BUILD_OS=${BUILD_OS} BUILD_ARCH=${BUILD_ARCH} TESTING_OPTIONS=${TESTING_OPTIONS}
@@ -142,7 +147,7 @@ develop-$(PROJECT)-%: FORCE
 	@#
 	@for TOOL in ${TOOLS_TO_INSTALL}; do \
 		echo "* fetching $${TOOL} with netgo suffix for $(GOOS):$(GOARCH)"; \
-		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
+		CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
 	done
 	@#
 	@echo "* generating sources"
@@ -214,7 +219,7 @@ $(PROJECT)-%: FORCE
 	@#
 	@for TOOL in ${TOOLS_TO_INSTALL}; do \
 		echo "* fetching $${TOOL} with netgo suffix for $(GOOS):$(GOARCH)"; \
-		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
+		CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
 	done
 	@#
 	@echo "* generating sources"
