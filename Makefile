@@ -148,7 +148,7 @@ develop-$(PROJECT)-%: FORCE
 	@#
 	@for TOOL in ${TOOLS_TO_INSTALL}; do \
 		echo "* fetching $${TOOL} with netgo suffix for $(GOOS):$(GOARCH)"; \
-		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
+		CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
 	done
 	@#
 	@echo "* generating sources"
@@ -220,7 +220,7 @@ $(PROJECT)-%: FORCE
 	@#
 	@for TOOL in ${TOOLS_TO_INSTALL}; do \
 		echo "* fetching $${TOOL} with netgo suffix for $(GOOS):$(GOARCH)"; \
-		GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
+		CGO_ENABLED=0 go get -tags netgo -installsuffix netgo -u $${TOOL}/...; \
 	done
 	@#
 	@echo "* generating sources"
