@@ -19,6 +19,8 @@ DEVELOP_SKIP_BUILD=false
 #e.g: make develop DEVELOP_AFTER_BUILD="(sleep 10; echo TADAAAAAAA)&"	
 DEVELOP_AFTER_BUILD=
 
+PWD=$(shell pwd) # on Windows, PWD is an UNC paths which does not work with docker volumes path syntax
+
 ifeq ($(OS),Windows_NT)
 	BUILD_OS = windows
 	ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
