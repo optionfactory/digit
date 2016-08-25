@@ -27,7 +27,11 @@ ifeq ($(OS),Windows_NT)
 		BUILD_ARCH = amd64
 	endif
 	ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-		BUILD_ARCH = 386
+		ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
+			BUILD_ARCH = amd64
+		else
+			BUILD_ARCH = 386
+		endif
 	endif
 else
 	UNAME_S := $(shell uname -s)
