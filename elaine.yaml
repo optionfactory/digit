@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/optionfactory/elaine/refs/heads/master/schema/elaine-v1.schema.json
+schema_version: 1
+name: digit
+tier: tier3
+type: service
+lifecycle: active
+commissioner: Crédit Agricole
+channel: Moneytec
+compliance:
+  ai_act: out-of-scope
+  ads: pending-assessment
+  cra: default
+  dora: non-critical
+  nis2: out-of-scope
+  gdpr: pending-assessment
+  data_residency: eu
+sensitivity:
+  - pii
+stewards:
+  - Roberto Ferranti
+environments:
+  - name: local
+    type: local
+    ingress: local
+    management: local
+
